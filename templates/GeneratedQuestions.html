@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Generated Questions</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,700" rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z" crossorigin="anonymous">
+    <style>
+      body {
+        background-color: #f5f5f5;
+        font-family: 'Helvetica Neue', sans-serif;
+        font-size: 16px;
+        line-height: 1.5;
+      }
+      
+      .form-group label {
+        font-weight: light;
+        margin-bottom: 5px;
+      }
+      
+      .form-control {
+        border-radius: 0;
+        font-size: 16px;
+      }
+      
+      .form-check-label {
+        padding-left: 0;
+      }
+      
+      .center {
+        display: flex;
+        justify-content: center;
+      }
+      
+      .btn-primary {
+        border-radius: 0;
+      }
+      
+      .form-prompt label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 5px;
+      }
+      
+      .form-prompt textarea {
+        border-radius: 0;
+        font-size: 16px;
+        height: 200px;
+        padding: 10px;
+        resize: vertical;
+        width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>User Survey Form</h1>
+      <!-- <form id="user-form" method="POST" action="/survey"> -->
+        <form method="POST" action="{{ url_for('generatedQuestions') }}" class="form-inline">
+
+        <div class="form-group">
+          <label for="firstname">First Name</label>
+          <input type="text" class="form-control" id="firstname" name = "firstname" placeholder="First Name">
+        </div>
+        
+        <div class="form-group">
+          <label for="lastname">Last Name</label>
+          <input type="text" class="form-control" id="lastname" name = "lastname" placeholder="Last Name">
+        </div>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" class="form-control" id="email" name = "email" placeholder="Email">
+        </div>
+        <div class="form-group">
+          <label><b>What is your age range?</b></label><br>
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="agerange" id="under-18" value="Under 18">
+            <label class="form-check-label" for="under-18">Under 18</label>
+          </div>
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="agerange" id="18-24" value="18-24">
+            <label class="form-check-label" for="18-24">18-24</label>
+          </div>
+          <div class="form-check form-check-inline">
+           <input class="form-check-input" type="radio" name="agerange" id="25-34" value= "35-44">
+<label class="form-check-label" for="35-44">35-44</label>
+</div>
+<div class="form-check form-check-inline">
+<input class="form-check-input" type="radio" name="agerange" id="45-54" value="45-54">
+<label class="form-check-label" for="45-54">45-54</label>
+</div>
+<div class="form-check form-check-inline">
+<input class="form-check-input" type="radio" name="agerange" id="55-64" value="55-64">
+<label class="form-check-label" for="55-64">55-64</label>
+</div>
+<div class="form-check form-check-inline">
+<input class="form-check-input" type="radio" name="agerange" id="65-plus" value="65+">
+<label class="form-check-label" for="65-plus">65+</label>
+</div>
+</div>
+<div class="form-group">
+<label><b>What is your gender?</b></label><br>
+<div class="form-check form-check-inline">
+<input class="form-check-input" type="radio" name="gender" id="male" value="Male">
+<label class="form-check-label" for="male">Male</label>
+</div>
+<div class="form-check form-check-inline">
+<input class="form-check-input" type="radio" name="gender" id="female" value="Female">
+<label class="form-check-label" for="female">Female</label>
+</div>
+<div class="form-check form-check-inline">
+<input class="form-check-input" type="radio" name="gender" id="transgender" value="Transgender">
+<label class="form-check-label" for="transgender">Transgender</label>
+</div>
+<div class="form-check form-check-inline">
+<input class="form-check-input" type="radio" name="gender" id="non-binary" value="Non-binary">
+<label class="form-check-label" for="non-binary">Non-binary</label>
+</div>
+<div class="form-check form-check-inline">
+<input class="form-check-input" type="radio" name="gender" id="no-response" value="No response">
+<label class="form-check-label" for="no-response">No Response</label>
+</div>
+
+</div>
+
+<div class="form-group">
+  <label for="race"><b>What is your race?</b></label><br>
+  <div class="form-check form-check-inline">
+    <input class="form-check-input" type="radio" name="race" id="white" value="white">
+    <label class="form-check-label" for="white">White</label>
+  </div>
+  <div class="form-check form-check-inline">
+    <input class="form-check-input" type="radio" name="race" id="black" value="black">
+    <label class="form-check-label" for="black">Black or African American</label>
+  </div>
+  <div class="form-check form-check-inline">
+    <input class="form-check-input" type="radio" name="race" id="asian" value="asian">
+    <label class="form-check-label" for="asian">Asian</label>
+  </div>
+  <div class="form-check form-check-inline">
+    <input class="form-check-input" type="radio" name="race" id="native" value="american indian or alaska native">
+    <label class="form-check-label" for="native">American Indian or Alaska Native</label>
+  </div>
+</div>
+
+
+  <div class="form-group">
+          <label for="employmentstatus"><b>What is your current employment status??</b></label><br>
+          <!-- Radio buttons for the options -->
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="employmentstatus" id="student" value="student">
+            <label class="form-check-label" for="student">Student</label>
+          </div>
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="employmentstatus" id="working" value="working">
+            <label class="form-check-label" for="working">Working professional</label>
+          </div>
+          <div class="form-check form-check-inline">
+            <input class="form-check-input" type="radio" name="employmentstatus" id="retired" value="retired">
+            <label class="form-check-label" for="retired">Retired</label>
+          </div>
+          </div>
+            </div>
+          </div>
+        </fieldset>
+        <H2>Generated Questions</H2>
+        {% for question in generated_questions %}
+        <p>{{ question }}</p>
+    
+      {% endfor %}
+        <div class="center">
+          <button type="submit" class="btn btn-primary btn-lg">Submit</button>
+        </div>
+</form>
+</div>
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+</body>
+</html>
+            
