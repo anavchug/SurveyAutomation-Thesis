@@ -56,7 +56,7 @@
     <div class="container">
       <h1>User Survey Form</h1>
       <!-- <form id="user-form" method="POST" action="/survey"> -->
-        <form method="POST" action="{{ url_for('generatedQuestions') }}" class="form-inline">
+        <form method="POST" action="/finalize_questions" class="form-inline">
 
         <div class="form-group">
           <label for="firstname">First Name</label>
@@ -163,6 +163,23 @@
             </div>
           </div>
         </fieldset>
+
+        <form action="/finalize_questions" method="post">
+          {% for question, answers in question_data %}
+            <div>
+              <h4>{{ question }}</h4>
+              {% for answer in answers %}
+                <label>
+                  <input type="radio" name="{{ question }}" value="{{ answer }}" required>
+                  {{ answer }}
+                </label>
+                <br>
+              {% endfor %}
+            </div>
+          {% endfor %}
+          <br>
+        <br />
+
         <div class="center">
           <button type="submit" class="btn btn-primary btn-lg">Submit</button>
         </div>
