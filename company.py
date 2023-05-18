@@ -2,6 +2,11 @@ from flask import Flask, redirect, request, render_template, url_for
 import openai
 import mysql.connector
 import re
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+import secrets
+import string
 
 app = Flask(__name__)
 # Apply for an OpenAI API key and paste it here
@@ -22,6 +27,7 @@ cursor = mydb.cursor()
 generated_questions = []
 formatted_questions = []
 formatted_answers = []
+emails = ["aakarshachugh23@gmail.com"]
 
 
 # Render the company information form
@@ -100,12 +106,6 @@ def survey_questions():
                 print(formatted_questions_final)
                 print(formatted_answers_final)
 
-        # Update the global formatted_questions and formatted_answers lists
-        # global formatted_questions
-        # global formatted_answers
-        # formatted_questions = formatted_questions_final
-        # formatted_answers = formatted_answers_final
-
         # Insert the remaining questions into the database
         question1 = formatted_questions_final[0]
         question2 = formatted_questions_final[1]
@@ -142,6 +142,7 @@ def finalize_questions():
         cursor.execute(sql, values)
         mydb.commit()
 
+        send_survey_invitations(emails)
         # Return success message
         return "Your responses have been recorded"
 
@@ -153,29 +154,21 @@ def finalize_questions():
         )
 
 
-# Render the generated questions form
+@app.route("/survey", methods=["GET"])
+def survey():
+    # Retrieve the token and email from the query parameters
+    token = request.args.get("token")
+    email = request.args.get("email")
 
-"""
-@app.route("/generated_questions", methods=["GET", "POST"])
-def generatedQuestions():
-    if request.method == "POST":
-        # Process the user survey form data on form submission
-        # Get form data
-        return "Survey Submitted"
+    # Perform any necessary verification/validation based on the token and email
 
-    else:
-        # Get the generated questions from the query string parameters
-        formatted_questions = request.args.getlist("formatted_questions")
-        formatted_answers = request.args.getlist("formatted_answers")
-        print(generated_questions)
-
-        # Render the generated questions template
-        return render_template(
-            "GeneratedQuestions.html",
-            formatted_questions=formatted_questions,
-            formatted_answers=formatted_answers,
-        )
-"""
+    # Render the GeneratedQuestions.html page
+    return render_template(
+        "GeneratedQuestions.html",
+        token=token,
+        email=email,
+        question_data=zip(formatted_questions, formatted_answers),
+    )
 
 
 # Define a function to generate questions based on the prompt and return them in a list
@@ -206,6 +199,56 @@ def generate_question(prompt):
 
     # Return the list of generated questions
     return questions
+
+
+def send_survey_invitations(emails):
+    sender_email = "anav.chug18@gmail.com"  # Set the sender's email address
+    subject = "Survey Invitation"  # Set the email subject
+
+    for email in emails:
+        # Generate a unique URL for each survey response
+        survey_url = generate_survey_url(email)
+
+        # Create the email content
+        message = MIMEMultipart()
+        message["From"] = sender_email
+        message["To"] = email
+        message["Subject"] = subject
+
+        # Add the survey URL to the email body
+        body = f"Dear recipient,\n\nPlease click the following link to fill out the survey:\n{survey_url}"
+        message.attach(MIMEText(body, "plain"))
+
+        # Convert the message to a string
+        email_content = message.as_string()
+
+        # Send the email
+        smtp_server = "smtp.gmail.com"  # Set the SMTP server details
+        smtp_port = 587  # Set the SMTP server port
+        smtp_username = "anav.chug18@gmail.com"  # Set your SMTP username
+        smtp_password = "wkgrpezmzbealdxb"  # Set your SMTP password, using this password so we dont get any authentication errors
+
+        with smtplib.SMTP(smtp_server, smtp_port) as server:
+            server.starttls()
+            server.login(smtp_username, smtp_password)
+            server.sendmail(sender_email, email, email_content)
+
+
+def generate_survey_url(email):
+    # Generate a unique URL for each survey response based on the email
+    # You can use a unique identifier or token here
+    unique_token = generate_unique_token()
+
+    # Construct the survey URL with the unique token
+    survey_url = f"http://127.0.0.1:5000/survey?token={unique_token}&email={email}"
+
+    return survey_url
+
+
+def generate_unique_token(length=16):
+    characters = string.ascii_letters + string.digits
+    token = "".join(secrets.choice(characters) for _ in range(length))
+    return token
 
 
 if __name__ == "__main__":
