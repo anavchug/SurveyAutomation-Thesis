@@ -59,7 +59,7 @@
   <body>
     <div class="container mt-5">
       <h1 class="text-center">Company Target Audience Form</h1>
-      <form action="/" method="POST" >
+      <form action="/" method="post">
         <div class="form-group">
           <label for="name">Company Name</label>
           <input
@@ -107,8 +107,9 @@
             name="prompt"
             placeholder="Enter a prompt that describes your product and demographic interest"
           ></textarea>
-        </div>
+        </div> 
         <div class="center">
+          <input type="hidden" name="prompt" value="{{ prompt }}">
           <button type="submit" class="btn btn-primary btn-lg">Submit</button>
         </div>
       </form>

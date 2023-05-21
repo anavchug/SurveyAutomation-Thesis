@@ -63,25 +63,19 @@ def index():
         cursor.execute(sql, values)
         mydb.commit()
 
+        # generate questions using the generate_question method
         generated_questions = generate_question(prompt)
+        # formatting the questions and answers using the format_generated_questions method
+        formatted_questions, formatted_answers = format_generated_questions(
+            generated_questions
+        )
+
         print("Generated questions", generated_questions)
-
-        for question in generated_questions:
-            # Extract the questions and format them to remove extra spaces
-            question_text = question.split("?")[0].strip() + "?"
-            formatted_questions.append(question_text)
-            print("Formatted questions", formatted_questions)
-
-            # Extract the options and format them to remove extra spaces
-            options = re.split(r"[\n\r]+", question.split("?")[1].strip())
-            if options:
-                formatted_answers.append(
-                    [option.split(")")[1].strip() for option in options if option]
-                )
-            print("Formatted answers", formatted_answers)
+        print("Formatted questions", formatted_questions)
+        print("Formatted answers", formatted_answers)
 
         # return "Form submitted"
-        return redirect(url_for("survey_questions"))
+        return redirect(url_for("survey_questions", prompt=prompt))
     else:
         return render_template("Company Interface.html")
 
@@ -89,7 +83,25 @@ def index():
 @app.route("/survey_questions", methods=["GET", "POST"])
 def survey_questions():
     # Generate the survey questions based on the prompt and display it on the page
-    if request.method == "POST":
+    if request.method == "POST" and "generate_questions" in request.form:
+        # Retrieve the prompt from the last inserted row in the company_prompts table
+        sql = "SELECT prompt FROM company_prompts ORDER BY promptId DESC LIMIT 1"
+        cursor.execute(sql)
+        result = cursor.fetchone()
+        prompt = result[0] if result else None
+
+        if prompt is None:
+            return "Error: No prompt found in the company_prompts table."
+
+        # Handle generation of additional questions
+        generated_questions = generate_question(prompt)
+        global formatted_questions, formatted_answers
+        formatted_questions, formatted_answers = format_generated_questions(
+            generated_questions
+        )
+        return redirect(url_for("survey_questions"))
+
+    elif request.method == "POST":
         # Extract the questions to be deleted
         delete_list = []
         for key, value in request.form.items():
@@ -116,18 +128,31 @@ def survey_questions():
         mydb.commit()
 
         return redirect(url_for("finalize_questions"))
-    else:
-        return render_template(
-            "SurveyQuestions.html",
-            question_data=zip(formatted_questions, formatted_answers),
-        )
+    return render_template(
+        "SurveyQuestions.html",
+        question_data=zip(formatted_questions, formatted_answers),
+    )
 
 
 @app.route("/finalize_questions", methods=["GET", "POST"])
 def finalize_questions():
     if request.method == "POST":
-        # Redirect the user to generated Questions
-        # return redirect(url_for("generatedQuestions"))
+        send_survey_invitations(emails)
+        return "Survey has been sent to your email list"
+    else:
+        # Render the generated questions page
+        return render_template(
+            "GeneratedQuestions.html",
+            question_data=zip(formatted_questions, formatted_answers),
+        )
+
+
+@app.route("/survey", methods=["GET", "POST"])
+def survey():
+    # Retrieve the token and email from the query parameters
+    token = request.args.get("token")
+    email = request.args.get("email")
+    if request.method == "POST":
         firstname = request.form["firstname"]
         lastname = request.form["lastname"]
         email = request.form["email"]
@@ -142,25 +167,8 @@ def finalize_questions():
         cursor.execute(sql, values)
         mydb.commit()
 
-        send_survey_invitations(emails)
         # Return success message
         return "Your responses have been recorded"
-
-    else:
-        # Render the generated questions page
-        return render_template(
-            "GeneratedQuestions.html",
-            question_data=zip(formatted_questions, formatted_answers),
-        )
-
-
-@app.route("/survey", methods=["GET"])
-def survey():
-    # Retrieve the token and email from the query parameters
-    token = request.args.get("token")
-    email = request.args.get("email")
-
-    # Perform any necessary verification/validation based on the token and email
 
     # Render the GeneratedQuestions.html page
     return render_template(
@@ -199,6 +207,25 @@ def generate_question(prompt):
 
     # Return the list of generated questions
     return questions
+
+
+def format_generated_questions(generated_questions):
+    # formatted_questions = []
+    # formatted_answers = []
+
+    for question in generated_questions:
+        # Extract the questions and format them to remove extra spaces
+        question_text = question.split("?")[0].strip() + "?"
+        formatted_questions.append(question_text)
+
+        # Extract the options and format them to remove extra spaces
+        options = re.split(r"[\n\r]+", question.split("?")[1].strip())
+        if options:
+            formatted_answers.append(
+                [option.split(")")[1].strip() for option in options if option]
+            )
+
+    return formatted_questions, formatted_answers
 
 
 def send_survey_invitations(emails):
