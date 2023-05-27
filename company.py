@@ -27,6 +27,8 @@ cursor = mydb.cursor()
 generated_questions = []
 formatted_questions = []
 formatted_answers = []
+formatted_questions_final = []
+formatted_answers_final = []
 emails = ["aakarshachugh23@gmail.com"]
 
 
@@ -102,21 +104,36 @@ def survey_questions():
         return redirect(url_for("survey_questions"))
 
     elif request.method == "POST":
-        # Extract the questions to be deleted
-        delete_list = []
+        # Print the form items
         for key, value in request.form.items():
-            if key.startswith("delete_"):
-                delete_list.append(int(key.split("_")[1]))
+            print(f"Key: {key}, Value: {value}")
 
-        # Remove the deleted questions from the formatted lists
-        formatted_questions_final = []
-        formatted_answers_final = []
-        for i, question in enumerate(formatted_questions):
-            if i not in delete_list:
-                formatted_questions_final.append(question)
-                formatted_answers_final.append(formatted_answers[i])
-                print(formatted_questions_final)
-                print(formatted_answers_final)
+        # Extract the questions and answers
+        question_number = 1
+        current_answers = []
+        for key, value in request.form.items():
+            if key.startswith("question"):
+                formatted_questions_final.append(value)
+            if current_answers:
+                clean_answers = [
+                    answer.strip("[]").replace("'", "").replace('"', "")
+                    for answer in current_answers
+                ]
+                formatted_answers_final.append(clean_answers)
+                current_answers = []
+                question_number += 1
+            elif key.startswith("answer"):
+                current_answers.append(value)
+
+        if current_answers:
+            clean_answers = [
+                answer.strip("[]").replace("'", "").replace('"', "")
+                for answer in current_answers
+            ]
+            formatted_answers_final.append(clean_answers)
+
+        print("Formatted Questions", formatted_questions_final)
+        print("Formatted Answers", formatted_answers_final)
 
         # Insert the remaining questions into the database
         question1 = formatted_questions_final[0]
@@ -127,11 +144,18 @@ def survey_questions():
         cursor.execute(sql, values)
         mydb.commit()
 
-        return redirect(url_for("finalize_questions"))
-    return render_template(
-        "SurveyQuestions.html",
-        question_data=zip(formatted_questions, formatted_answers),
-    )
+        return redirect(
+            url_for(
+                "finalize_questions",
+                question_data=zip(formatted_questions_final, formatted_answers_final),
+            )
+        )
+
+    else:
+        return render_template(
+            "SurveyQuestions.html",
+            question_data=zip(formatted_questions, formatted_answers),
+        )
 
 
 @app.route("/finalize_questions", methods=["GET", "POST"])
@@ -141,9 +165,10 @@ def finalize_questions():
         return "Survey has been sent to your email list"
     else:
         # Render the generated questions page
+
         return render_template(
             "GeneratedQuestions.html",
-            question_data=zip(formatted_questions, formatted_answers),
+            question_data=zip(formatted_questions_final, formatted_answers_final),
         )
 
 
