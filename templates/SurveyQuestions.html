@@ -7,93 +7,225 @@
     <!-- Bootstrap CSS -->
     <link
       rel="stylesheet"
-      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
-      crossorigin="anonymous"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css"
     />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+    <style>
+    body {
+      background-color: #f9f9f9;
+  }
+      .container {
+        max-width: 1000px;
+        margin: 0 auto;
+        margin-top: -20px;
+        background-color: #fcfcfc;
+        border-radius: 4px;
+        padding: 30px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .question-container {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 15px;
+      }
+
+      .question-container .question {
+        flex-grow: 1;
+      }
+
+      .generate-questions-button {
+        background-color: #008cba;
+        border: none;
+        color: white;
+        padding: 10px 20px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin-top: 10px;
+        cursor: pointer;
+      }
+
+      .create-survey-button {
+        background-color: #4caf50;
+        border: none;
+        color: white;
+        padding: 10px 20px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin-top: 10px;
+        cursor: pointer;
+      }
+      .my-form {
+        overflow-y: scroll;
+        max-height: 68vh;
+        word-wrap: break-word;
+      }
+      .my-form::-webkit-scrollbar {
+        width: 8px; /* Set the width of the scrollbar */
+      }
+
+      .my-form::-webkit-scrollbar-thumb {
+        background-color: #888; /* Set the color of the scrollbar thumb */
+        border-radius: 4px; /* Add rounded corners to the thumb */
+      }
+
+      .my-form::-webkit-scrollbar-thumb:hover {
+        background-color: #555; /* Set the color of the thumb on hover */
+      }
+
+      .my-form::-webkit-scrollbar-track {
+        background-color: #f1f1f1; /* Set the color of the scrollbar track */
+      }
+      h1 {
+    font-size: 36px;
+    font-weight: bold;
+    color: #0088cc;
+    text-align: center;
+    margin-bottom: 20px;
+    font-family: "Arial", sans-serif;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    letter-spacing: 1px;
+  }
+
+  .special-paragraph {
+    font-size: 18px;
+    text-align: center;
+    margin-bottom: 20px;
+    font-family: "Arial", sans-serif;
+  }
+
+  .special-paragraph strong {
+    font-weight: normal;
+    color: #666;
+    line-height: 1.5;
+    display: block;
+  }
+
+  .special-paragraph strong {
+    font-weight: normal;
+    color: #666;
+    line-height: 1.5;
+    display: block;
+  }
+  .question-container {
+    margin-bottom: 20px;
+    padding: 15px;
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .question {
+    font-weight: bold;
+    color: #333;
+    font-size: 20px;
+    margin-bottom: 5px;
+    font-family: "Andale Mono", monospace	;
+  }
+
+  .answer-label {
+    display: flex;
+    align-items: center;
+    margin-bottom: -10px;
+    font-size: 15px;
+    font-family: "Courier New", monospace	;
+    font-weight: 600;
+  }
+
+  .answer-label input[type="radio"] {
+    margin-right: 8px;
+  }
+
+  .answer-label span {
+    display: inline-block;
+    padding: 6px 12px;
+    background-color: #ffffff;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    transition: background-color 0.3s ease;
+    cursor: pointer;
+    font-weight: normal;
+  }
+
+  .answer-label span:hover {
+    background-color: #f9f9f9;
+  }
+
+    </style>
   </head>
-  <style>
-    .question-container {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .delete-btn {
-      margin-right: 20px;
-    }
-  </style>
-
   <body>
-    <div class="container">
-      <form action="/survey_questions" method="post">
-        <h1>Review Stage</h1>
-        <h3>Generated Questions</h3>
+    <h1>Review Stage</h1>
+    <p class="special-paragraph">
+      <strong
+        >Feel free to generate more questions or delete any unwanted
+        questions.</br>
+        When you're ready, click the button below to create your
+        survey! &#x1F60A;</strong
+      >
+    </p>
+    <div class="partition"></div>
 
+    <div class="container">
+
+      <form class="my-form" action="/survey_questions" method="post">
         {% for question, answers in question_data %}
         <div class="question-container" data-index="{{ loop.index }}">
-          <button type="button" class="btn btn-danger delete-btn">X</button>
-          <p>{{ question }}</p>
-          {% for answer in answers %}
-          <label>
+          <button type="button" class="btn btn-default btn-sm">
+            <span class="glyphicon glyphicon-trash"></span>
+          </button>
+          <div class="question">
+            <p><strong>{{ question }}</strong></p>
+            {% for answer in answers %}
+            <label class="answer-label">
+              <input
+                type="radio"
+                name="{{ loop.index0 }}"
+                value="{{ loop.index0 }}"
+              />
+              {{ answer }}
+            </label>
+            <br />
+            {% endfor %}
             <input
-              type="radio"
-              name="{{ loop.index0 }}"
-              value="{{ loop.index0 }}"
+              type="hidden"
+              name="question{{ loop.index }}"
+              value="{{ question }}"
             />
-            {{ answer }}
-          </label>
-          <br />
-          {% endfor %}
-          <input
-            type="hidden"
-            name="question{{ loop.index }}"
-            value="{{ question }}"
-          />
-          <input
-            type="hidden"
-            name="answer{{ loop.index }}"
-            value="{{ answers }}"
-          />
+            <input
+              type="hidden"
+              name="answer{{ loop.index }}"
+              value="{{ answers }}"
+            />
+          </div>
         </div>
         {% endfor %}
-
-        <button type="submit">Create Survey</button>
-        <br />
-        <!-- Add a button to trigger generation of additional questions -->
-        <button type="submit" name="generate_questions">
+        <button
+          type="submit"
+          name="generate_questions"
+          class="generate-questions-button"
+        >
           Generate More Questions
         </button>
+        <br />
+        <button type="submit" class="create-survey-button">
+          Create Survey
+        </button>
       </form>
+      <!-- Add a button to trigger generation of additional questions -->
     </div>
-
-    <!-- Bootstrap JS -->
-    <script
-      src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
-      integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
-      crossorigin="anonymous"
-    ></script>
-    <script
-      src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"
-      integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1"
-      crossorigin="anonymous"
-    ></script>
-    <script
-      src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
-      integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM"
-      crossorigin="anonymous"
-    ></script>
     <script>
-      const deleteBtns = document.querySelectorAll(".delete-btn");
+      const deleteBtns = document.querySelectorAll(".btn.btn-default.btn-sm");
 
       deleteBtns.forEach((btn) => {
         btn.addEventListener("click", () => {
           const questionContainer = btn.parentElement;
           const questionIndex = questionContainer.getAttribute("data-index");
-
-          // Remove the question and its corresponding answers from the lists
-          //formattedQuestions.splice(questionIndex - 1, 1);
-          //formattedAnswers.splice(questionIndex - 1, 1);
 
           // Update the data-index attribute of each question container
           const questionContainers = document.querySelectorAll(

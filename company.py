@@ -8,7 +8,7 @@ from email.mime.text import MIMEText
 import secrets
 import string
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder="static")
 # Apply for an OpenAI API key and paste it here
 openai.api_key = "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"
 
@@ -135,12 +135,23 @@ def survey_questions():
         print("Formatted Questions", formatted_questions_final)
         print("Formatted Answers", formatted_answers_final)
 
-        # Insert the remaining questions into the database
-        question1 = formatted_questions_final[0]
-        question2 = formatted_questions_final[1]
         companyId = cursor.lastrowid
-        sql = "INSERT INTO Questions (companyId, question1, question2) VALUES (%s, %s, %s)"
-        values = (companyId, question1, question2)
+        # Get the number of questions
+        num_questions = len(formatted_questions_final)
+
+        # Create a list with 10 elements, where the first element is the companyId
+        values = [companyId]
+
+        # Append the questions to the values list
+        values.extend(formatted_questions_final)
+
+        # Pad the values list with None for remaining columns
+        values += [None] * (10 - num_questions)
+
+        # Build the SQL query
+        sql = "INSERT INTO Questions (companyId, question1, question2, question3, question4, question5, question6, question7, question8, question9, question10) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+
+        # Execute the SQL query
         cursor.execute(sql, values)
         mydb.commit()
 
@@ -200,7 +211,7 @@ def survey():
         "GeneratedQuestions.html",
         token=token,
         email=email,
-        question_data=zip(formatted_questions, formatted_answers),
+        question_data=zip(formatted_questions_final, formatted_answers_final),
     )
 
 

@@ -87,7 +87,11 @@
   <body>
     <div class="universal-container">
       <div class="left-container">
-        <img class="image" src="survey.jpg" alt="Image" />
+        <img
+          class="image"
+          src="{{ url_for('static', filename='survey.jpg') }}"
+          alt="Image"
+        />
       </div>
       <div class="right-container">
         <div class="container mt-5">

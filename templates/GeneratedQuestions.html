@@ -2,13 +2,13 @@
 <html>
   <head>
     <title>Generated Questions</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link
       rel="stylesheet"
-      href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css"
-      integrity="sha384-JcKb8q3iqJ61gNV9KGb8thSsNjpSL0n8PARn9HuZOnIxN0hoP+VmmDGMN5t9UJ0Z"
-      crossorigin="anonymous"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css"
     />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+
     <style>
       body {
         background-color: #ede7e7;
@@ -16,86 +16,108 @@
         font-size: 16px;
         line-height: 1.5;
       }
+      b {
+        color: #000080;
+      }
+      h1 {
+        font-size: 36px;
+        font-weight: bold;
+        color: #0088cc;
+        text-align: center;
+        margin-bottom: 20px;
+        font-family: "Arial", sans-serif;
+        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        letter-spacing: 1px;
+      }
       .container {
-        max-width: 800px;
+        max-width: 700px;
         margin: 0 auto;
         background-color: #fdfdfd;
         border-radius: 4px;
-        padding: 30px;
+        padding: 20px;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
       }
 
       .form-group label {
         font-weight: light;
-        margin-bottom: 5px;
+        margin-bottom: 10px;
+        color: #006400; /* Text color */
       }
 
       .form-control {
         border-radius: 0;
         font-size: 16px;
+        width: 200px;
+        color: #000080; /* Text color */
       }
-      .form-group {
-      display: block;
-      flex-direction: column;
-      margin-bottom: 10px;
-     }
 
       .form-check-label {
         padding-left: 0;
+        color: #006400; /* Text color */
       }
-
-      .center {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 10vh; /* Adjust this value based on the container height */
-  }
 
       .btn-primary {
         border-radius: 0;
       }
 
-      .form-prompt label {
-        display: block;
-        font-weight: bold;
-        margin-bottom: 5px;
-      }
-
-      .form-prompt textarea {
-        border-radius: 0;
-        font-size: 16px;
-        height: 200px;
-        padding: 10px;
-        resize: vertical;
-        width: 50%;
-      }
       .question-container {
-        margin-bottom: 20px;
+        margin-bottom: 10px;
+        color: #000080;
       }
 
       .question {
-        margin-bottom: 10px;
+        margin-bottom: 20px;
+        color: #000080;
       }
 
       .question label {
         display: block;
         margin-bottom: 2px;
+        color: #006400; /* Text color */
       }
-      .submit-button {
-    position: absolute;
-    bottom: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    /* Add other necessary styles for the submit button */
-  }
+      .my-form {
+        overflow-y: scroll;
+        max-height: 100vh;
+        word-wrap: break-word;
+      }
+      .my-form::-webkit-scrollbar {
+        width: 8px; /* Set the width of the scrollbar */
+      }
+
+      .my-form::-webkit-scrollbar-thumb {
+        background-color: #888; /* Set the color of the scrollbar thumb */
+        border-radius: 4px; /* Add rounded corners to the thumb */
+      }
+
+      .my-form::-webkit-scrollbar-thumb:hover {
+        background-color: #555; /* Set the color of the thumb on hover */
+      }
+
+      .my-form::-webkit-scrollbar-track {
+        background-color: #f1f1f1; /* Set the color of the scrollbar track */
+      }
+
+      .create-survey-button {
+        background-color: #4caf50;
+        border: none;
+        color: white;
+        padding: 10px 20px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin-top: 10px;
+        cursor: pointer;
+      }
     </style>
   </head>
   <body>
     <div class="container">
       <h1>User Survey Form</h1>
-      <form method="POST" action="/finalize_questions" class="form-inline">
+      <form method="POST" action="/finalize_questions" class="my-form">
         <div class="form-group">
           <label for="firstname">First Name</label>
+          <br />
           <input
             type="text"
             class="form-control"
@@ -104,10 +126,10 @@
             placeholder="First Name"
           />
         </div>
-        <br>
 
         <div class="form-group">
           <label for="lastname">Last Name</label>
+          <br />
           <input
             type="text"
             class="form-control"
@@ -116,10 +138,10 @@
             placeholder="Last Name"
           />
         </div>
-        <br>
 
         <div class="form-group">
           <label for="email">Email</label>
+          <br />
           <input
             type="email"
             class="form-control"
@@ -128,7 +150,6 @@
             placeholder="Email"
           />
         </div>
-        <br>
 
         <div class="form-group">
           <label><b>What is your age range?</b></label
@@ -349,33 +370,18 @@
         <div class="question-container">
           {% for question, answers in question_data %}
           <div class="question">
-            <h6><strong>{{ question }}</strong></h4>
+            <h4><strong>{{ question }}</strong></h4>
             {% for answer in answers[0].split(', ') %}
             <label>
-              <input
-                type="radio"
-                name="{{ question }}"
-                value="{{ answer }}"
-                required
-              />
+              <input type="radio" name="{{ question }}" value="{{ answer }}" />
               {{ answer }}
             </label>
             {% endfor %}
           </div>
           {% endfor %}
-          <button type="submit" class="btn btn-primary btn-lg">Submit</button>
+          <button type="submit" class="create-survey-button">Submit</button>
         </div>
       </form>
     </div>
-    <script
-      src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
-      integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj"
-      crossorigin="anonymous"
-    ></script>
-    <script
-      src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"
-      integrity="sha384-B4Ufyk9BTA41+OJmA1k7U2GCdbCkKj3gzeJfN7owmIw+20UksdQRVvoxMfooE/5v"
-      crossorigin="anonymous"
-    ></script>
   </body>
 </html>
