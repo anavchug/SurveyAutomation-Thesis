@@ -378,8 +378,23 @@
             </label>
             {% endfor %}
           </div>
-          {% endfor %}
-          <button type="submit" class="create-survey-button">Submit</button>
+          {% endfor %} {% if current_route == '/finalize_questions' %}
+          <button
+            type="submit"
+            class="create-survey-button"
+            formaction="/finalize_questions"
+          >
+            Create Survey
+          </button>
+          {% elif current_route == '/survey' %}
+          <button
+            type="submit"
+            class="create-survey-button"
+            formaction="/survey"
+          >
+            Submit
+          </button>
+          {% endif %}
         </div>
       </form>
     </div>

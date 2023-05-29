@@ -161,7 +161,6 @@ def survey_questions():
                 question_data=zip(formatted_questions_final, formatted_answers_final),
             )
         )
-
     else:
         return render_template(
             "SurveyQuestions.html",
@@ -171,23 +170,27 @@ def survey_questions():
 
 @app.route("/finalize_questions", methods=["GET", "POST"])
 def finalize_questions():
+    current_route = "/finalize_questions"
     if request.method == "POST":
         send_survey_invitations(emails)
         return "Survey has been sent to your email list"
     else:
         # Render the generated questions page
-
         return render_template(
             "GeneratedQuestions.html",
             question_data=zip(formatted_questions_final, formatted_answers_final),
+            current_route=current_route,
         )
 
 
 @app.route("/survey", methods=["GET", "POST"])
 def survey():
+    # question_data = zip([], [])
+    answers = request.form
     # Retrieve the token and email from the query parameters
     token = request.args.get("token")
     email = request.args.get("email")
+    current_route = "/survey"
     if request.method == "POST":
         firstname = request.form["firstname"]
         lastname = request.form["lastname"]
@@ -197,22 +200,64 @@ def survey():
         race = request.form["race"]
         employmentstatus = request.form["employmentstatus"]
 
+        companyId = cursor.lastrowid
+        userId = cursor.lastrowid
+        quesId = cursor.lastrowid
+        promptId = cursor.lastrowid
+
         # Insert data into the database
         sql = "INSERT INTO User (firstname, lastname, email, agerange, gender, race, employmentstatus) VALUES (%s, %s, %s, %s, %s, %s, %s)"
         values = (firstname, lastname, email, agerange, gender, race, employmentstatus)
         cursor.execute(sql, values)
         mydb.commit()
 
-        # Return success message
+        # Retrieve the form data
+        form_data = request.form
+        print("form daata: ", form_data)
+
+        # Generate the SQL query
+        survey_sql = "INSERT INTO Survey (CompanyId, UserId, QuesId, PromptId, response1, response2, response3, response4, response5, response6, response7, response8, response9, response10)VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+
+        # Prepare the values for the SQL query
+        survey_values = [
+            companyId,
+            userId,  # Use the corresponding user ID from the User table
+            quesId,  # Use the corresponding question ID
+            promptId,  # Use the corresponding prompt ID
+        ]
+
+        # Retrieve and append the responses to the values list
+        user_data_keys = [
+            "firstname",
+            "lastname",
+            "email",
+            "agerange",
+            "gender",
+            "race",
+            "employmentstatus",
+        ]
+        for key, value in form_data.items():
+            if key not in user_data_keys:
+                survey_values.append(value)
+
+        survey_values += [None] * (14 - len(survey_values))
+        print(len(survey_values))
+
+        cursor.execute(survey_sql, survey_values)
+        mydb.commit()
+
+        # Return success message-
         return "Your responses have been recorded"
 
     # Render the GeneratedQuestions.html page
-    return render_template(
-        "GeneratedQuestions.html",
-        token=token,
-        email=email,
-        question_data=zip(formatted_questions_final, formatted_answers_final),
-    )
+    else:
+        return render_template(
+            "GeneratedQuestions.html",
+            token=token,
+            email=email,
+            question_data=zip(formatted_questions_final, formatted_answers_final),
+            current_route=current_route,
+        )
 
 
 # Define a function to generate questions based on the prompt and return them in a list
@@ -246,9 +291,6 @@ def generate_question(prompt):
 
 
 def format_generated_questions(generated_questions):
-    # formatted_questions = []
-    # formatted_answers = []
-
     for question in generated_questions:
         # Extract the questions and format them to remove extra spaces
         question_text = question.split("?")[0].strip() + "?"
