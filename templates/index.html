@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Analysis Dashboard</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+
+      h2 {
+        text-align: center;
+      }
+
+      .chart-container {
+        margin-bottom: 20px;
+        position: relative;
+      }
+
+      .chart-title {
+        font-weight: bold;
+        margin-bottom: 10px;
+      }
+
+      .view-demographic-button {
+        background-color: #4caf50;
+        border: none;
+        color: white;
+        padding: 10px 40px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        font-size: 16px;
+        margin-top: 10px;
+        margin-right: 50px;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Analysis Dashboard</h2>
+    {% for question_text in question_texts %}
+    <div class="chart-container">
+      <div id="chart{{ loop.index0 }}"></div>
+      <button type="button" class="view-demographic-button" onclick="viewDemographics({{ loop.index }}, '{{ question_text }}')">
+        View Demographics
+      </button>
+    </div>
+
+    <script>
+      var graphData{{ loop.index0 }} = {{ graphJSONs[loop.index0] | safe }};
+      Plotly.newPlot("chart{{ loop.index0 }}", graphData{{ loop.index0 }});
+    </script>
+    {% endfor %}
+
+    <script>
+      function viewDemographics(questionId, questionText) {
+        var encodedQuestionText = encodeURIComponent(questionText);
+        window.location.href = "/demographics/" + questionId + "?question_text=" + encodedQuestionText;
+      }
+    </script>
+  </body>
+</html>

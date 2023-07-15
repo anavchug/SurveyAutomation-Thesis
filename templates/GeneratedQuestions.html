@@ -101,12 +101,13 @@
         background-color: #4caf50;
         border: none;
         color: white;
-        padding: 10px 20px;
+        padding: 10px 40px;
         text-align: center;
         text-decoration: none;
         display: inline-block;
         font-size: 16px;
         margin-top: 10px;
+        margin-right: 50px;
         cursor: pointer;
       }
     </style>
@@ -115,259 +116,271 @@
     <div class="container">
       <h1>User Survey Form</h1>
       <form method="POST" action="/finalize_questions" class="my-form">
-        <div class="form-group">
-          <label for="firstname">First Name</label>
-          <br />
-          <input
-            type="text"
-            class="form-control"
-            id="firstname"
-            name="firstname"
-            placeholder="First Name"
-          />
+        <div id="demographic-section">
+          <div class="form-group">
+            <label for="firstname">First Name</label>
+            <br />
+            <input
+              type="text"
+              class="form-control"
+              id="firstname"
+              name="firstname"
+              placeholder="First Name"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="lastname">Last Name</label>
+            <br />
+            <input
+              type="text"
+              class="form-control"
+              id="lastname"
+              name="lastname"
+              placeholder="Last Name"
+            />
+          </div>
+
+          <div class="form-group">
+            <label for="email">Email</label>
+            <br />
+            <input
+              type="email"
+              class="form-control"
+              id="email"
+              name="email"
+              placeholder="Email"
+            />
+          </div>
+
+          <div class="form-group">
+            <label><b>What is your age range?</b></label
+            ><br />
+            <!-- Age range radio buttons -->
+
+            <div class="form-check form-check-inline">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="agerange"
+                id="under-18"
+                value="Under 18"
+              />
+              <label class="form-check-label" for="under-18">Under 18</label>
+            </div>
+            <div class="form-check form-check-inline">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="agerange"
+                id="18-24"
+                value="18-24"
+              />
+              <label class="form-check-label" for="18-24">18-24</label>
+            </div>
+            <div class="form-check form-check-inline">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="agerange"
+                id="25-34"
+                value="35-44"
+              />
+              <label class="form-check-label" for="35-44">35-44</label>
+            </div>
+            <div class="form-check form-check-inline">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="agerange"
+                id="45-54"
+                value="45-54"
+              />
+              <label class="form-check-label" for="45-54">45-54</label>
+            </div>
+            <div class="form-check form-check-inline">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="agerange"
+                id="55-64"
+                value="55-64"
+              />
+              <label class="form-check-label" for="55-64">55-64</label>
+            </div>
+            <div class="form-check form-check-inline">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="agerange"
+                id="65-plus"
+                value="65+"
+              />
+              <label class="form-check-label" for="65-plus">65+</label>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label><b>What is your gender?</b></label
+            ><br />
+            <!-- Gender radio buttons -->
+            <div class="form-check form-check-inline">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="gender"
+                id="male"
+                value="Male"
+              />
+              <label class="form-check-label" for="male">Male</label>
+            </div>
+            <div class="form-check form-check-inline">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="gender"
+                id="female"
+                value="Female"
+              />
+              <label class="form-check-label" for="female">Female</label>
+            </div>
+            <div class="form-check form-check-inline">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="gender"
+                id="transgender"
+                value="Transgender"
+              />
+              <label class="form-check-label" for="transgender"
+                >Transgender</label
+              >
+            </div>
+            <div class="form-check form-check-inline">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="gender"
+                id="non-binary"
+                value="Non-binary"
+              />
+              <label class="form-check-label" for="non-binary"
+                >Non-binary</label
+              >
+            </div>
+            <div class="form-check form-check-inline">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="gender"
+                id="no-response"
+                value="No response"
+              />
+              <label class="form-check-label" for="no-response"
+                >No Response</label
+              >
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="race"><b>What is your race?</b></label
+            ><br />
+            <!-- Race radio buttons -->
+            <div class="form-check form-check-inline">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="race"
+                id="white"
+                value="white"
+              />
+              <label class="form-check-label" for="white">White</label>
+            </div>
+            <div class="form-check form-check-inline">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="race"
+                id="black"
+                value="black"
+              />
+              <label class="form-check-label" for="black"
+                >Black or African American</label
+              >
+            </div>
+            <div class="form-check form-check-inline">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="race"
+                id="asian"
+                value="asian"
+              />
+              <label class="form-check-label" for="asian">Asian</label>
+            </div>
+            <div class="form-check form-check-inline">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="race"
+                id="native"
+                value="american indian or alaska native"
+              />
+              <label class="form-check-label" for="native"
+                >American Indian or Alaska Native</label
+              >
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="employmentstatus"
+              ><b>What is your current employment status?</b></label
+            ><br />
+            <!-- Employment status radio buttons -->
+            <div class="form-check form-check-inline">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="employmentstatus"
+                id="student"
+                value="student"
+              />
+              <label class="form-check-label" for="student">Student</label>
+            </div>
+            <div class="form-check form-check-inline">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="employmentstatus"
+                id="working"
+                value="working"
+              />
+              <label class="form-check-label" for="working"
+                >Working professional</label
+              >
+            </div>
+            <div class="form-check form-check-inline">
+              <input
+                class="form-check-input"
+                type="radio"
+                name="employmentstatus"
+                id="retired"
+                value="retired"
+              />
+              <label class="form-check-label" for="retired">Retired</label>
+            </div>
+          </div>
         </div>
 
-        <div class="form-group">
-          <label for="lastname">Last Name</label>
-          <br />
-          <input
-            type="text"
-            class="form-control"
-            id="lastname"
-            name="lastname"
-            placeholder="Last Name"
-          />
-        </div>
+        <button type="button" class="create-survey-button" id="next-button">
+          Next
+        </button>
 
-        <div class="form-group">
-          <label for="email">Email</label>
-          <br />
-          <input
-            type="email"
-            class="form-control"
-            id="email"
-            name="email"
-            placeholder="Email"
-          />
-        </div>
-
-        <div class="form-group">
-          <label><b>What is your age range?</b></label
-          ><br />
-          <!-- Age range radio buttons -->
-
-          <div class="form-check form-check-inline">
-            <input
-              class="form-check-input"
-              type="radio"
-              name="agerange"
-              id="under-18"
-              value="Under 18"
-            />
-            <label class="form-check-label" for="under-18">Under 18</label>
-          </div>
-          <div class="form-check form-check-inline">
-            <input
-              class="form-check-input"
-              type="radio"
-              name="agerange"
-              id="18-24"
-              value="18-24"
-            />
-            <label class="form-check-label" for="18-24">18-24</label>
-          </div>
-          <div class="form-check form-check-inline">
-            <input
-              class="form-check-input"
-              type="radio"
-              name="agerange"
-              id="25-34"
-              value="35-44"
-            />
-            <label class="form-check-label" for="35-44">35-44</label>
-          </div>
-          <div class="form-check form-check-inline">
-            <input
-              class="form-check-input"
-              type="radio"
-              name="agerange"
-              id="45-54"
-              value="45-54"
-            />
-            <label class="form-check-label" for="45-54">45-54</label>
-          </div>
-          <div class="form-check form-check-inline">
-            <input
-              class="form-check-input"
-              type="radio"
-              name="agerange"
-              id="55-64"
-              value="55-64"
-            />
-            <label class="form-check-label" for="55-64">55-64</label>
-          </div>
-          <div class="form-check form-check-inline">
-            <input
-              class="form-check-input"
-              type="radio"
-              name="agerange"
-              id="65-plus"
-              value="65+"
-            />
-            <label class="form-check-label" for="65-plus">65+</label>
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label><b>What is your gender?</b></label
-          ><br />
-          <!-- Gender radio buttons -->
-          <div class="form-check form-check-inline">
-            <input
-              class="form-check-input"
-              type="radio"
-              name="gender"
-              id="male"
-              value="Male"
-            />
-            <label class="form-check-label" for="male">Male</label>
-          </div>
-          <div class="form-check form-check-inline">
-            <input
-              class="form-check-input"
-              type="radio"
-              name="gender"
-              id="female"
-              value="Female"
-            />
-            <label class="form-check-label" for="female">Female</label>
-          </div>
-          <div class="form-check form-check-inline">
-            <input
-              class="form-check-input"
-              type="radio"
-              name="gender"
-              id="transgender"
-              value="Transgender"
-            />
-            <label class="form-check-label" for="transgender"
-              >Transgender</label
-            >
-          </div>
-          <div class="form-check form-check-inline">
-            <input
-              class="form-check-input"
-              type="radio"
-              name="gender"
-              id="non-binary"
-              value="Non-binary"
-            />
-            <label class="form-check-label" for="non-binary">Non-binary</label>
-          </div>
-          <div class="form-check form-check-inline">
-            <input
-              class="form-check-input"
-              type="radio"
-              name="gender"
-              id="no-response"
-              value="No response"
-            />
-            <label class="form-check-label" for="no-response"
-              >No Response</label
-            >
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label for="race"><b>What is your race?</b></label
-          ><br />
-          <!-- Race radio buttons -->
-          <div class="form-check form-check-inline">
-            <input
-              class="form-check-input"
-              type="radio"
-              name="race"
-              id="white"
-              value="white"
-            />
-            <label class="form-check-label" for="white">White</label>
-          </div>
-          <div class="form-check form-check-inline">
-            <input
-              class="form-check-input"
-              type="radio"
-              name="race"
-              id="black"
-              value="black"
-            />
-            <label class="form-check-label" for="black"
-              >Black or African American</label
-            >
-          </div>
-          <div class="form-check form-check-inline">
-            <input
-              class="form-check-input"
-              type="radio"
-              name="race"
-              id="asian"
-              value="asian"
-            />
-            <label class="form-check-label" for="asian">Asian</label>
-          </div>
-          <div class="form-check form-check-inline">
-            <input
-              class="form-check-input"
-              type="radio"
-              name="race"
-              id="native"
-              value="american indian or alaska native"
-            />
-            <label class="form-check-label" for="native"
-              >American Indian or Alaska Native</label
-            >
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label for="employmentstatus"
-            ><b>What is your current employment status?</b></label
-          ><br />
-          <!-- Employment status radio buttons -->
-          <div class="form-check form-check-inline">
-            <input
-              class="form-check-input"
-              type="radio"
-              name="employmentstatus"
-              id="student"
-              value="student"
-            />
-            <label class="form-check-label" for="student">Student</label>
-          </div>
-          <div class="form-check form-check-inline">
-            <input
-              class="form-check-input"
-              type="radio"
-              name="employmentstatus"
-              id="working"
-              value="working"
-            />
-            <label class="form-check-label" for="working"
-              >Working professional</label
-            >
-          </div>
-          <div class="form-check form-check-inline">
-            <input
-              class="form-check-input"
-              type="radio"
-              name="employmentstatus"
-              id="retired"
-              value="retired"
-            />
-            <label class="form-check-label" for="retired">Retired</label>
-          </div>
-        </div>
-
-        <div class="question-container">
+        <div
+          class="question-container"
+          id="questions-section"
+          style="display: none"
+        >
           {% for question, answers in question_data %}
           <div class="question">
             <h4><strong>{{ question }}</strong></h4>
@@ -378,7 +391,17 @@
             </label>
             {% endfor %}
           </div>
-          {% endfor %} {% if current_route == '/finalize_questions' %}
+
+          {% endfor %}
+          <button
+            type="button"
+            class="create-survey-button"
+            id="back-button"
+            style="display: none"
+          >
+            Back
+          </button>
+          {% if current_route == '/finalize_questions' %}
           <button
             type="submit"
             class="create-survey-button"
@@ -398,5 +421,22 @@
         </div>
       </form>
     </div>
+    <script>
+      $(document).ready(function () {
+        $("#next-button").click(function () {
+          $("#demographic-section").hide();
+          $("#questions-section").show();
+          $(this).hide();
+          $("#back-button").show();
+        });
+
+        $("#back-button").click(function () {
+          $("#questions-section").hide();
+          $("#demographic-section").show();
+          $("#next-button").show();
+          $(this).hide();
+        });
+      });
+    </script>
   </body>
 </html>

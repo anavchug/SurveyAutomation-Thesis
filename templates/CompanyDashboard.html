@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Dashboard</title>
+  <style>
+    body {
+      background-color: #f2f9ff;
+    }
+    
+    .company-dashboard {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    
+    .create-survey-button {
+      background-color: #009579;
+      border: none;
+      color: white;
+      padding: 15px 120px;
+      text-align: center;
+      text-decoration: none;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 18px;
+      margin-top: 10px;
+      margin-right: 10px;
+      margin-left: 25px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="company-dashboard">
+    <h3>Welcome, {{ username }}! Hope you are having a good day!</h3>
+    <button type="button" class="create-survey-button" onclick="window.location.href='/company'">Create New Survey</button>
+    <br>
+    <button type="button" class="create-survey-button" onclick="window.location.href='/analysis'">View Analysis Dashboard</button>
+  </div>
+</body>
+
+</html>

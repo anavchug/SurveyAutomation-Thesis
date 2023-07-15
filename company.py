@@ -1,4 +1,4 @@
-from flask import Flask, redirect, request, render_template, url_for
+from flask import Flask, redirect, request, render_template, url_for, session
 import openai
 import mysql.connector
 import re
@@ -7,6 +7,8 @@ from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import secrets
 import string
+import pandas as pd
+import plotly.express as px
 
 app = Flask(__name__, static_folder="static")
 # Apply for an OpenAI API key and paste it here
@@ -29,57 +31,116 @@ formatted_questions = []
 formatted_answers = []
 formatted_questions_final = []
 formatted_answers_final = []
-emails = ["aakarshachugh23@gmail.com"]
+emails = ["aakarshachugh23@gmail.com", "aakarshachugh19@gmail.com"]
 
-
-# Render the company information form
-@app.route("/", methods=["GET", "POST"])
+# Render the login page 
+@app.route('/', methods=['GET', 'POST'])
 def index():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+        # Check if the username and password are valid in the database
+        query = "SELECT * FROM Accounts WHERE username = %s AND password = %s"
+        cursor.execute(query, (username, password))
+        user = cursor.fetchone()
+
+        if user:
+            # Store the user's information in the session
+            session['username'] = user[1]
+            return redirect('/dashboard')
+        else:
+            return 'Invalid username or password'
+
+    return render_template("login.html")
+
+
+@app.route("/register", methods=['GET', 'POST'])
+def register():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+        # Check if the username is already taken
+        query = "SELECT * FROM Accounts WHERE username = %s"
+        cursor.execute(query, (username,))
+        existing_user = cursor.fetchone()
+
+        if existing_user:
+            return 'Username already exists'
+        else:
+            # Insert the new user into the database
+            query = "INSERT INTO Accounts (username, password) VALUES (%s, %s)"
+            cursor.execute(query, (username, password))
+            mydb.commit()
+
+            # Store the user's information in the session
+            session['username'] = username
+            return redirect('/')
+
+    return render_template("register.html")
+
+
+@app.route('/dashboard')
+def dashboard():
+    # Check if the user is logged in by checking the session
+    if 'username' in session:
+        username = session['username']
+        return render_template("CompanyDashboard.html", username = username)
+    else:
+        return redirect('/')
+
+
+@app.route('/logout')
+def logout():
+    # Clear the session and redirect to the login page
+    session.clear()
+    return redirect('/')
+
+@app.route("/company", methods=["GET", "POST"])
+def company():
     if request.method == "POST":
-        print(request.form)
         name = request.form["name"]
         branch = request.form["branch"]
         email = request.form["email"]
         phone = request.form["phone"]
         prompt = request.form["prompt"]
 
-        # print(name, branch, email, phone, prompt)
-        # Insert company data into the database
-        sql = (
-            "INSERT INTO companies (name, branch, email, phone) VALUES (%s, %s, %s, %s)"
-        )
-        print(cursor.rowcount)
-        values = (name, branch, email, phone)
-        print(values)
-        cursor.execute(sql, values)
-        mydb.commit()
+        # Check if the company already exists in the database
+        query = "SELECT companyId FROM companies WHERE name = %s AND branch = %s"
+        values = (name, branch)
+        cursor.execute(query, values)
+        existing_company = cursor.fetchone()
 
-        # Retrieve the companyId of the inserted row
-        companyId = cursor.lastrowid
+        if existing_company:
+            companyId = existing_company[0]  # Retrieve the existing companyId
+        else:
+            # Insert company data into the database
+            sql = "INSERT INTO companies (name, branch, email, phone) VALUES (%s, %s, %s, %s)"
+            values = (name, branch, email, phone)
+            cursor.execute(sql, values)
+            mydb.commit()
+
+            # Retrieve the companyId of the inserted row
+            companyId = cursor.lastrowid
 
         # Insert the prompt into the company_prompts table with the corresponding companyId value
         sql = "INSERT INTO company_prompts (companyId, prompt) VALUES (%s, %s)"
-        print(cursor.rowcount)
         values = (companyId, prompt)
-        print(values)
         cursor.execute(sql, values)
         mydb.commit()
 
-        # generate questions using the generate_question method
+        # Generate questions using the generate_question method
         generated_questions = generate_question(prompt)
-        # formatting the questions and answers using the format_generated_questions method
+        # Format the questions and answers using the format_generated_questions method
         formatted_questions, formatted_answers = format_generated_questions(
             generated_questions
         )
 
-        print("Generated questions", generated_questions)
-        print("Formatted questions", formatted_questions)
-        print("Formatted answers", formatted_answers)
-
-        # return "Form submitted"
         return redirect(url_for("survey_questions", prompt=prompt))
     else:
         return render_template("Company Interface.html")
+
 
 
 @app.route("/survey_questions", methods=["GET", "POST"])
@@ -185,12 +246,12 @@ def finalize_questions():
 
 @app.route("/survey", methods=["GET", "POST"])
 def survey():
-    # question_data = zip([], [])
     answers = request.form
     # Retrieve the token and email from the query parameters
     token = request.args.get("token")
     email = request.args.get("email")
     current_route = "/survey"
+
     if request.method == "POST":
         firstname = request.form["firstname"]
         lastname = request.form["lastname"]
@@ -201,7 +262,7 @@ def survey():
         employmentstatus = request.form["employmentstatus"]
 
         companyId = cursor.lastrowid
-        userId = cursor.lastrowid
+        # userId = cursor.lastrowid
         quesId = cursor.lastrowid
         promptId = cursor.lastrowid
 
@@ -214,6 +275,8 @@ def survey():
         # Retrieve the form data
         form_data = request.form
         print("form daata: ", form_data)
+        # getting the user id of the last inserted row
+        userId = cursor.lastrowid
 
         # Generate the SQL query
         survey_sql = "INSERT INTO Survey (CompanyId, UserId, QuesId, PromptId, response1, response2, response3, response4, response5, response6, response7, response8, response9, response10)VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
@@ -259,6 +322,241 @@ def survey():
             current_route=current_route,
         )
 
+# Define a route for the home page
+@app.route("/analysis")
+def home():
+    # Fetch data from the MySQL database
+    cursor = mydb.cursor()
+    cursor.execute(
+        "SELECT * FROM Survey INNER JOIN User ON Survey.UserId = User.userId"
+    )
+    data = cursor.fetchall()
+    print("Initial data:", data)
+    cursor.close()
+
+    # Convert data to DataFrame
+    column_names = [
+        "SurveyID",
+        "CompanyId",
+        "UserId",
+        "QuesId",
+        "PromptId",
+        "response1",
+        "response2",
+        "response3",
+        "response4",
+        "response5",
+        "response6",
+        "response7",
+        "response8",
+        "response9",
+        "response10",
+        "userId",
+        "FirstName",
+        "LastName",
+        "Email",
+        "AgeRange",
+        "Gender",
+        "Race",
+        "EmploymentStatus",
+    ]
+    data = pd.DataFrame(data, columns=column_names)
+    print("Formatted after using Pandas:", data)
+
+    # Extract the response columns
+    responses = data[
+        [
+            "response1",
+            "response2",
+            "response3",
+            "response4",
+            "response5",
+            "response6",
+            "response7",
+            "response8",
+            "response9",
+            "response10",
+        ]
+    ]
+
+    # extract the demographic columns
+    demographics = data[["AgeRange", "Gender", "Race", "EmploymentStatus"]]
+    print(demographics)
+
+    # Retrieve questions from the Questions table
+    cursor = mydb.cursor()
+    cursor.execute(
+        "SELECT QuesId, Question1, Question2, Question3, Question4, Question5, Question6, Question7, Question8, Question9, Question10 FROM Questions"
+    )
+    questions_data = cursor.fetchall()
+    print(questions_data)
+    cursor.close()
+
+    # Create a dictionary to map question IDs to question texts
+    question_mapping = {
+        row[0]: [q for q in row[1:] if q is not None] for row in questions_data
+    }
+    print(question_mapping)
+
+    # Create a bar chart for each response column
+    charts = []
+    question_texts = []  # List to store question texts
+    index = 0
+    i = 1
+
+    for column in responses.columns:
+        # Filter out empty responses
+        non_empty_responses = responses[column].dropna()
+
+        # Proceed only if there are non-empty responses
+        if not non_empty_responses.empty:
+            question_id = int(
+                column[8:]
+            )  # Extract the question ID from the column name
+            question_texts.extend(question_mapping.get(question_id, []))
+
+            chart = px.bar(
+                non_empty_responses.value_counts(),
+                x=non_empty_responses.unique(),
+                y=non_empty_responses.value_counts(),
+            )
+            chart.update_layout(
+                title_text=f"Question {str(i)} : {question_texts[index]}",
+                xaxis_title="Responses",
+                yaxis_title="Count",
+            )
+            charts.append(chart)
+            index = index + 1
+            i = i + 1
+
+    # Convert the Plotly figures to JSON
+    graphJSONs = [chart.to_json() for chart in charts]
+
+    return render_template(
+        "index.html",
+        graphJSONs=graphJSONs,
+        num_charts=len(charts),
+        question_mapping=question_mapping,
+        question_texts=question_texts,
+    )
+
+@app.route("/demographics/<int:question_id>")
+def demographics(question_id):
+    cursor_age = mydb.cursor()
+    age_query = """
+    SELECT
+        U.AgeRange,
+        S.{response_column},
+        COUNT(*) AS Frequency
+    FROM
+        User U
+        JOIN Survey S ON U.userId = S.UserId
+        JOIN Questions Q ON Q.CompanyId = S.CompanyId
+    WHERE
+        S.CompanyId = Q.CompanyId
+        AND Q.Question{question_id} IS NOT NULL
+    GROUP BY
+        U.AgeRange,
+        S.{response_column}
+    """
+
+    cursor_age.execute(age_query.format(question_id=question_id, response_column=f"response{question_id}"))
+    data_age = cursor_age.fetchall()
+    cursor_age.close()
+
+    cursor_gender = mydb.cursor()
+    gender_query = """
+    SELECT
+        U.Gender,
+        S.{response_column},
+        COUNT(*) AS Frequency
+    FROM
+        User U
+        JOIN Survey S ON U.userId = S.UserId
+        JOIN Questions Q ON Q.CompanyId = S.CompanyId
+    WHERE
+        S.CompanyId = Q.CompanyId
+        AND Q.Question{question_id} IS NOT NULL
+    GROUP BY
+        U.Gender,
+        S.{response_column}
+    """
+
+    cursor_gender.execute(gender_query.format(question_id=question_id, response_column=f"response{question_id}"))
+    data_gender = cursor_gender.fetchall()
+    cursor_gender.close()
+
+    cursor_race = mydb.cursor()
+    race_query = """
+    SELECT
+        U.Race,
+        S.{response_column},
+        COUNT(*) AS Frequency
+    FROM
+        User U
+        JOIN Survey S ON U.userId = S.UserId
+        JOIN Questions Q ON Q.CompanyId = S.CompanyId
+    WHERE
+        S.CompanyId = Q.CompanyId
+        AND Q.Question{question_id} IS NOT NULL
+    GROUP BY
+        U.Race,
+        S.{response_column}
+    """
+
+    cursor_race.execute(race_query.format(question_id=question_id, response_column=f"response{question_id}"))
+    data_race= cursor_race.fetchall()
+    cursor_race.close()
+
+    cursor_employment = mydb.cursor()
+    employmentStatus_query = """
+    SELECT
+        U.EmploymentStatus,
+        S.{response_column},
+        COUNT(*) AS Frequency
+    FROM
+        User U
+        JOIN Survey S ON U.userId = S.UserId
+        JOIN Questions Q ON Q.CompanyId = S.CompanyId
+    WHERE
+        S.CompanyId = Q.CompanyId
+        AND Q.Question{question_id} IS NOT NULL
+    GROUP BY
+        U.EmploymentStatus,
+        S.{response_column}
+    """
+    cursor_employment.execute(employmentStatus_query.format(question_id=question_id, response_column=f"response{question_id}"))
+    data_employment= cursor_employment.fetchall()
+    cursor_employment.close()
+
+    # Creating columns for different demographics for the Data Frame
+    column_names_for_age = ["AgeRange", "Response", "Frequency"]
+    column_names_for_gender = ["Gender", "Response", "Frequency"]
+    column_names_for_race = ["Race", "Response", "Frequency"]
+    column_names_for_employment_status = ["EmploymentStatus", "Response", "Frequency"]
+
+
+    #Convert demographics to Dataframe
+    age_data = pd.DataFrame(data_age, columns=column_names_for_age)
+    gender_data = pd.DataFrame(data_gender, columns=column_names_for_gender)
+    race_data = pd.DataFrame(data_race, columns=column_names_for_race)
+    employmentStatus_data = pd.DataFrame(data_employment, columns=column_names_for_employment_status)
+
+    # Creating Charts for each demographic
+    age_chart = px.bar(age_data, x="AgeRange", y="Frequency", color="Response", barmode="group")
+    gender_chart = px.bar(gender_data, x="Gender", y="Frequency", color="Response", barmode="group")
+    race_chart = px.bar(race_data, x="Race", y="Frequency", color="Response", barmode="group")
+    employmentStatus_chart = px.bar(employmentStatus_data, x="EmploymentStatus", y="Frequency", color="Response", barmode="group")
+
+    # Converting charts to Json
+    age_graphJSON = age_chart.to_json()
+    gender_graphJSON = gender_chart.to_json()
+    race_graphJSON = race_chart.to_json()
+    employmentStatus_graphJSON = employmentStatus_chart.to_json()
+
+    return render_template("demographics.html", age_graphJSON=age_graphJSON, 
+                           gender_graphJSON = gender_graphJSON, race_graphJSON = race_graphJSON, 
+                           employmentStatus_graphJSON = employmentStatus_graphJSON  )
 
 # Define a function to generate questions based on the prompt and return them in a list
 def generate_question(prompt):
@@ -357,4 +655,8 @@ def generate_unique_token(length=16):
 
 
 if __name__ == "__main__":
+    app.secret_key = 'mykeyistheweirdestkeyevercreated#4322'
+    app.config['SESSION_TYPE'] = 'filesystem'
+
     app.run(debug=True)
+    app.run()

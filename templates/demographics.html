@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Demographic Analysis</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+      }
+
+      h3 {
+        color: #333;
+        margin-top: 40px;
+      }
+
+      .question-text {
+        font-weight: bold;
+        margin-top: 35px;
+        font-size: large;
+      }
+    </style>
+  </head>
+
+  <body>
+    <h3>Analysis by Age</h3>
+    <div id="age_chart"></div>
+
+    <h3>Analysis by Gender</h3>
+    <div id="gender_chart"></div>
+
+    <h3>Analysis by Race</h3>
+    <div id="race_chart"></div>
+
+    <h3>Analysis by Employment Status</h3>
+    <div id="employmentStatus_chart"></div>
+
+    <script>
+      var ageRangeData = {{ age_graphJSON | safe }};
+      Plotly.newPlot("age_chart", ageRangeData);
+
+      var genderData = {{ gender_graphJSON | safe }};
+      Plotly.newPlot("gender_chart", genderData);
+
+      var raceData = {{ race_graphJSON | safe }};
+      Plotly.newPlot("race_chart", raceData);
+
+      var employmentData = {{ employmentStatus_graphJSON | safe }};
+      Plotly.newPlot("employmentStatus_chart", employmentData);
+    </script>
+
+    <script>
+      var urlParams = new URLSearchParams(window.location.search);
+      var questionText = urlParams.get("question_text");
+      if (questionText) {
+        var questionElement = document.createElement("p");
+        questionElement.classList.add("question-text");
+        questionElement.innerText = questionText;
+        document.body.insertBefore(questionElement, document.body.firstChild);
+      }
+    </script>
+  </body>
+</html>
