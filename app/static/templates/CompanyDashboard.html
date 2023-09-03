@@ -4,7 +4,7 @@
   <title>Dashboard</title>
   <style>
     body {
-      background-color: #f2f9ff;
+      background-color: #87b1c7;
     }
     
     .company-dashboard {
@@ -31,12 +31,31 @@
       margin-left: 25px;
       cursor: pointer;
     }
+    .logout-button {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    background-color: #f44336; /* Red color for the button background */
+    color: white; /* White text color */
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 16px;
+    }
+
+.logout-button:hover {
+  background-color: #d32f2f; /* Darker red color on hover */
+}
   </style>
 </head>
 
 <body>
   <div class="company-dashboard">
-    <h3>Welcome, {{ username }}! Hope you are having a good day!</h3>
+    <h3 style="color: white;">Welcome, {{ username }}! Hope you are having a good day!</h3>
+    <form action="{{ url_for('auth.logout') }}" method="post">
+      <input type="hidden" name="_method" value="POST">
+      <button type="submit" class = "logout-button">Logout</button>
+  </form>
     <button type="button" class="create-survey-button" onclick="window.location.href='/company'">Create New Survey</button>
     <br>
     <button type="button" class="create-survey-button" onclick="window.location.href='/analysis'">View Analysis Dashboard</button>

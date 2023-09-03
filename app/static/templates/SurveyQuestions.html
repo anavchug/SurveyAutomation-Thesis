@@ -176,7 +176,10 @@
       <form class="my-form" action="/survey_questions" method="post">
         {% for question, answers in question_data %}
         <div class="question-container" data-index="{{ loop.index }}">
-          <button type="button" class="btn btn-default btn-sm">
+          <button
+          type="button"
+          class="btn btn-default btn-sm delete-question"
+          data-index="{{ loop.index0 }}">
             <span class="glyphicon glyphicon-trash"></span>
           </button>
           <div class="question">
@@ -220,24 +223,23 @@
       <!-- Add a button to trigger generation of additional questions -->
     </div>
     <script>
-      const deleteBtns = document.querySelectorAll(".btn.btn-default.btn-sm");
+    const deleteBtns = document.querySelectorAll(".btn.btn-default.btn-sm.delete-question");
 
-      deleteBtns.forEach((btn) => {
-        btn.addEventListener("click", () => {
-          const questionContainer = btn.parentElement;
-          const questionIndex = questionContainer.getAttribute("data-index");
+    deleteBtns.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const questionContainer = btn.parentElement;
+        const questionIndex = questionContainer.getAttribute("data-index");
+        console.log("Question deleted");
+        // Remove the question and answer from the page
+        questionContainer.remove();
 
-          // Update the data-index attribute of each question container
-          const questionContainers = document.querySelectorAll(
-            ".question-container"
-          );
-          questionContainers.forEach((container, index) => {
-            container.setAttribute("data-index", index + 1);
-          });
-
-          questionContainer.remove();
+        // Send the question index to the server for deletion
+        fetch(`/delete_question/${questionIndex}`, {
+          method: "POST",
         });
       });
+    });
+
     </script>
   </body>
 </html>

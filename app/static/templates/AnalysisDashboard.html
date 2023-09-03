@@ -3,43 +3,14 @@
   <head>
     <title>Analysis Dashboard</title>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    <style>
-      body {
-        font-family: Arial, sans-serif;
-        margin: 20px;
-      }
-
-      h2 {
-        text-align: center;
-      }
-
-      .chart-container {
-        margin-bottom: 20px;
-        position: relative;
-      }
-
-      .chart-title {
-        font-weight: bold;
-        margin-bottom: 10px;
-      }
-
-      .view-demographic-button {
-        background-color: #4caf50;
-        border: none;
-        color: white;
-        padding: 10px 40px;
-        text-align: center;
-        text-decoration: none;
-        display: inline-block;
-        font-size: 16px;
-        margin-top: 10px;
-        margin-right: 50px;
-        cursor: pointer;
-      }
-    </style>
+    <link rel="stylesheet" href="../analysis_style.css">
   </head>
   <body>
     <h2>Analysis Dashboard</h2>
+    <form action="{{ url_for('auth.logout') }}" method="post">
+      <input type="hidden" name="_method" value="POST">
+      <button type="submit" class = "logout-button">Logout</button>
+  </form>
     {% for question_text in question_texts %}
     <div class="chart-container">
       <div id="chart{{ loop.index0 }}"></div>

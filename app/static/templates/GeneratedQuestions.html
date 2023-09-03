@@ -381,18 +381,19 @@
           id="questions-section"
           style="display: none"
         >
-          {% for question, answers in question_data %}
-          <div class="question">
-            <h4><strong>{{ question }}</strong></h4>
-            {% for answer in answers[0].split(', ') %}
-            <label>
-              <input type="radio" name="{{ question }}" value="{{ answer }}" />
-              {{ answer }}
-            </label>
-            {% endfor %}
-          </div>
 
-          {% endfor %}
+        {% for question, answers in question_data %}
+        <div class="question">
+          <h4><strong>{{ question }}</strong></h4>
+            {% for answer in answers %}
+              <label>
+                <input type="radio" name="{{ question }}" value="{{ answer }}" />
+                {{ answer }}
+              </label>
+            {% endfor %}
+        </div>
+      {% endfor %}
+      
           <button
             type="button"
             class="create-survey-button"
