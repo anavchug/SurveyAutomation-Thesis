@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Generated Questions</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/review_stage_style.css') }}">
+    <!-- Bootstrap CSS -->
+    
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css"
+    />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+  </head>
+  <body>
+    <h1 class="display-4">Review Stage</h1>
+    <p class="special-paragraph">
+      <strong
+        >Feel free to generate more questions or delete any unwanted
+        questions.</br>
+        When you're ready, click the button below to create your
+        survey! &#x1F60A;</strong
+      >
+    </p>
+    <div class="partition"></div>
+
+    <div class="container">
+
+      <form class="my-form" action="/survey_questions" method="post">
+        {% for question, answers in question_data %}
+        <div class="question-container" data-index="{{ loop.index }}">
+          <button
+          type="button"
+          class="btn btn-default btn-sm delete-question"
+          data-index="{{ loop.index0 }}">
+            <span class="glyphicon glyphicon-trash"></span>
+          </button>
+          <div class="question">
+            <p><strong>{{ question }}</strong></p>
+            {% for answer in answers %}
+            <label class="answer-label">
+              <input
+                type="radio"
+                name="{{ loop.index0 }}"
+                value="{{ loop.index0 }}"
+              />
+              {{ answer }}
+            </label>
+            <br />
+            {% endfor %}
+            <input
+              type="hidden"
+              name="question{{ loop.index }}"
+              value="{{ question }}"
+            />
+            <input
+              type="hidden"
+              name="answer{{ loop.index }}"
+              value="{{ answers }}"
+            />
+          </div>
+        </div>
+        {% endfor %}
+        <button
+          type="submit"
+          name="generate_questions"
+          class="generate-questions-button"
+        >
+          Generate More Questions
+        </button>
+        <br />
+        <button type="submit" class="create-survey-button">
+          Create Survey
+        </button>
+      </form>
+      <!-- Add a button to trigger generation of additional questions -->
+    </div>
+    <script>
+    const deleteBtns = document.querySelectorAll(".btn.btn-default.btn-sm.delete-question");
+
+    deleteBtns.forEach((btn) => {
+      btn.addEventListener("click", () => {
+        const questionContainer = btn.parentElement;
+        const questionIndex = questionContainer.getAttribute("data-index");
+        console.log("Question deleted");
+        // Remove the question and answer from the page
+        questionContainer.remove();
+
+        // Send the question index to the server for deletion
+        fetch(`/delete_question/${questionIndex}`, {
+          method: "POST",
+        });
+      });
+    });
+
+    </script>
+  </body>
+</html>

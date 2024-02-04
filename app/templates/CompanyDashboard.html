@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Dashboard</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/company_dashboard_style.css') }}">
+</head>
+
+<body>
+  <div class="container mt-5">
+    <div class="jumbotron">
+      <h3 class="display-4">Welcome, {{ username }}!</h3>
+      <p class="lead">Hope you are having a good day!</p>
+      <form action="{{ url_for('auth.logout') }}" method="post" class="position-fixed top-0 end-0 m-4">
+        <input type="hidden" name="_method" value="POST">
+        <button type="submit" class="btn btn-danger" style="position: fixed; top: 10px; right: 10px;">Logout</button>
+      </form>
+      <button type="button" class="btn btn-primary mt-3" onclick="window.location.href='/company'"><b>Create New Survey</b></button>
+      <br>
+      <button type="button" class="btn btn-success mt-3" onclick="window.location.href='/analysis'"><b>View Analysis Dashboard</b></button>
+    </div>
+  </div>
+
+  <!-- Add the Bootstrap JS and Popper.js scripts (optional, only if you need Bootstrap features that require them) -->
+  <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>

@@ -2,6 +2,8 @@
 <html>
   <head>
     <title>Generated Questions</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/user_survey_style.css') }}">
+    
     <link
       rel="stylesheet"
       href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css"
@@ -9,116 +11,14 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
 
-    <style>
-      body {
-        background-color: #ede7e7;
-        font-family: "Helvetica Neue", sans-serif;
-        font-size: 16px;
-        line-height: 1.5;
-      }
-      b {
-        color: #000080;
-      }
-      h1 {
-        font-size: 36px;
-        font-weight: bold;
-        color: #0088cc;
-        text-align: center;
-        margin-bottom: 20px;
-        font-family: "Arial", sans-serif;
-        text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
-        letter-spacing: 1px;
-      }
-      .container {
-        max-width: 700px;
-        margin: 0 auto;
-        background-color: #fdfdfd;
-        border-radius: 4px;
-        padding: 20px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-      }
-
-      .form-group label {
-        font-weight: light;
-        margin-bottom: 10px;
-        color: #006400; /* Text color */
-      }
-
-      .form-control {
-        border-radius: 0;
-        font-size: 16px;
-        width: 200px;
-        color: #000080; /* Text color */
-      }
-
-      .form-check-label {
-        padding-left: 0;
-        color: #006400; /* Text color */
-      }
-
-      .btn-primary {
-        border-radius: 0;
-      }
-
-      .question-container {
-        margin-bottom: 10px;
-        color: #000080;
-      }
-
-      .question {
-        margin-bottom: 20px;
-        color: #000080;
-      }
-
-      .question label {
-        display: block;
-        margin-bottom: 2px;
-        color: #006400; /* Text color */
-      }
-      .my-form {
-        overflow-y: scroll;
-        max-height: 100vh;
-        word-wrap: break-word;
-      }
-      .my-form::-webkit-scrollbar {
-        width: 8px; /* Set the width of the scrollbar */
-      }
-
-      .my-form::-webkit-scrollbar-thumb {
-        background-color: #888; /* Set the color of the scrollbar thumb */
-        border-radius: 4px; /* Add rounded corners to the thumb */
-      }
-
-      .my-form::-webkit-scrollbar-thumb:hover {
-        background-color: #555; /* Set the color of the thumb on hover */
-      }
-
-      .my-form::-webkit-scrollbar-track {
-        background-color: #f1f1f1; /* Set the color of the scrollbar track */
-      }
-
-      .create-survey-button {
-        background-color: #4caf50;
-        border: none;
-        color: white;
-        padding: 10px 40px;
-        text-align: center;
-        text-decoration: none;
-        display: inline-block;
-        font-size: 16px;
-        margin-top: 10px;
-        margin-right: 50px;
-        cursor: pointer;
-      }
-    </style>
   </head>
   <body>
     <div class="container">
-      <h1>User Survey Form</h1>
+      <h1 class="display-4" >User Survey Form</h1>
       <form method="POST" action="/finalize_questions" class="my-form">
         <div id="demographic-section">
           <div class="form-group">
-            <label for="firstname">First Name</label>
+            <label for="firstname"><h4><b>First Name</b></h4></label>
             <br />
             <input
               type="text"
@@ -130,7 +30,7 @@
           </div>
 
           <div class="form-group">
-            <label for="lastname">Last Name</label>
+            <label for="lastname"><h4><b>Last Name</b></h4></label>
             <br />
             <input
               type="text"
@@ -142,7 +42,7 @@
           </div>
 
           <div class="form-group">
-            <label for="email">Email</label>
+            <label for="email"><h4><b>Email</b></h4></label>
             <br />
             <input
               type="email"
@@ -154,7 +54,7 @@
           </div>
 
           <div class="form-group">
-            <label><b>What is your age range?</b></label
+            <label><h4><b>What is your age range?</b></h4></label
             ><br />
             <!-- Age range radio buttons -->
 
@@ -221,7 +121,7 @@
           </div>
 
           <div class="form-group">
-            <label><b>What is your gender?</b></label
+            <label><h4><b>What is your gender?</b></h4></label
             ><br />
             <!-- Gender radio buttons -->
             <div class="form-check form-check-inline">
@@ -283,7 +183,7 @@
           </div>
 
           <div class="form-group">
-            <label for="race"><b>What is your race?</b></label
+            <label for="race"><h4><b>What is your race?</b></h4></label
             ><br />
             <!-- Race radio buttons -->
             <div class="form-check form-check-inline">
@@ -333,8 +233,7 @@
           </div>
 
           <div class="form-group">
-            <label for="employmentstatus"
-              ><b>What is your current employment status?</b></label
+            <label for="employmentstatus"><h4><b>What is your current employment status?</b></h4></label
             ><br />
             <!-- Employment status radio buttons -->
             <div class="form-check form-check-inline">

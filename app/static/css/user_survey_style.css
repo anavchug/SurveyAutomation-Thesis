@@ -1,0 +1,113 @@
+body {
+    background-color: #ede7e7;
+    font-family: "Helvetica Neue", sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
+  }
+  b {
+    color: #000080;
+  }
+  /* h1 {
+    font-size: 36px;
+    font-weight: bold;
+    color: #0088cc;
+    text-align: center;
+    margin-bottom: 20px;
+    font-family: "Arial", sans-serif;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+    letter-spacing: 1px;
+  } */
+  .container {
+    max-width: 700px;
+    margin: 0 auto;
+    background-color: #fdfdfd;
+    border-radius: 4px;
+    padding: 20px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  .form-group{
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .form-group label {
+    /* font-weight: light; */
+    margin-bottom: 10px;
+    color: #006400; /* Text color */
+    /* font-family: "Courier New", monospace; */
+    font-family: "Andale Mono", monospace;
+    font-weight: 600;
+  }
+
+  .form-control {
+    border-radius: 0;
+    font-size: 16px;
+    width: 200px;
+    color: #000080; 
+    width: 40%;
+  }
+
+  .form-check-label {
+    padding-left: 0;
+    color: #006400; /* Text color */
+  }
+
+  .btn-primary {
+    border-radius: 0;
+  }
+
+  .question-container {
+    margin-bottom: 10px;
+    color: #000080;
+  }
+
+  .question {
+    margin-bottom: 20px;
+    font-weight: bold;
+    color: #333;
+    /* font-size: 0px; */
+    margin-bottom: 5px;
+    font-family: "Andale Mono", monospace;
+  }
+
+  .question label {
+    display: block;
+    margin-bottom: 2px;
+    color: #006400; /* Text color */
+  }
+  .my-form {
+    overflow-y: scroll;
+    max-height: 100vh;
+    word-wrap: break-word;
+  }
+  .my-form::-webkit-scrollbar {
+    width: 8px; /* Set the width of the scrollbar */
+  }
+
+  .my-form::-webkit-scrollbar-thumb {
+    background-color: #888; /* Set the color of the scrollbar thumb */
+    border-radius: 4px; /* Add rounded corners to the thumb */
+  }
+
+  .my-form::-webkit-scrollbar-thumb:hover {
+    background-color: #555; /* Set the color of the thumb on hover */
+  }
+
+  .my-form::-webkit-scrollbar-track {
+    background-color: #f1f1f1; /* Set the color of the scrollbar track */
+  }
+
+  .create-survey-button {
+    background-color: #4caf50;
+    border: none;
+    color: white;
+    padding: 10px 40px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin-top: 10px;
+    margin-right: 50px;
+    cursor: pointer;
+  }

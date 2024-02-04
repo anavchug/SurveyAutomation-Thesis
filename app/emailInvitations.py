@@ -4,13 +4,13 @@ import smtplib
 import secrets
 import string
 
-def send_survey_invitations(emails, companyId):
+def send_survey_invitations(emails, companyId, promptId):
     sender_email = "anav.chug18@gmail.com"  # Set the sender's email address
     subject = "Survey Invitation"  # Set the email subject
 
     for email in emails:
         # Generate a unique URL for each survey response
-        survey_url = generate_survey_url(email, companyId)
+        survey_url = generate_survey_url(email, companyId, promptId)
 
         # Create the email content
         message = MIMEMultipart()
@@ -37,13 +37,13 @@ def send_survey_invitations(emails, companyId):
             server.sendmail(sender_email, email, email_content)
 
 
-def generate_survey_url(email, companyId):
+def generate_survey_url(email, companyId, promptId):
     # Generate a unique URL for each survey response based on the email
     # You can use a unique identifier or token here
     unique_token = generate_unique_token()
 
     # Construct the survey URL with the unique token
-    survey_url = f"http://127.0.0.1:5000/survey?token={unique_token}&email={email}&companyId={companyId}"
+    survey_url = f"http://127.0.0.1:5000/survey?token={unique_token}&email={email}&companyId={companyId}&promptId={promptId}"
 
     return survey_url
 

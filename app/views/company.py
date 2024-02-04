@@ -1,4 +1,4 @@
-from flask import Flask, Blueprint, redirect, request, render_template, url_for, session
+from flask import Flask, Blueprint, g, redirect, request, render_template, url_for, session
 from jinja2 import Environment
 import openai
 import re
@@ -17,7 +17,8 @@ env.filters['type'] = get_type
 # Apply for an OpenAI API key and paste it here
 openai.api_key = "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"
 
-model_engine = "text-davinci-002"
+# model_engine = "text-davinci-002"
+model_engine = "gpt-3.5-turbo-instruct"
 
 # Connect to MySQL database
 mydb = get_database_connection()
@@ -27,38 +28,51 @@ generated_questions = []
 formatted_questions = []
 formatted_answers = []
 emails = ["aakarshachugh23@gmail.com", "aakarshachugh19@gmail.com"]
+# global_prompt = None
 
 @company_bp.route("/company", methods=["GET", "POST"])
 def company():
+    # Check if the company already exists in the database
+    mydb = get_database_connection()
+    cursor = mydb.cursor()
+    # Get the company name from the session
+    company_id_in_session = session.get('user_id')
+    global global_prompt
+
+    query = "SELECT companyId FROM companies WHERE companyId = %s"
+    values = (company_id_in_session,)  # Use the company id from the session
+    cursor.execute(query, values)
+    existing_company = cursor.fetchone()
+
     if request.method == "POST":
-        name = request.form["name"]
-        branch = request.form["branch"]
-        email = request.form["email"]
-        phone = request.form["phone"]
         prompt = request.form["prompt"]
-
-        # Check if the company already exists in the database
-        mydb = get_database_connection()
-        cursor = mydb.cursor()
-
-        query = "SELECT companyId FROM companies WHERE name = %s AND branch = %s"
-        values = (name, branch)
-        cursor.execute(query, values)
-        existing_company = cursor.fetchone()
-
+        global_prompt = prompt
+        #if the company exists in the database then add the prompt to that company's company_prompt table and generate questions
         if existing_company:
-            companyId = existing_company[0]  # Retrieve the existing companyId
+            companyId = existing_company[0]  # Use the existing companyId
+            # Insert the prompt into the company_prompts table with the corresponding companyId value
+            promptQuery = "INSERT INTO company_prompts (companyId, prompt) VALUES (%s, %s)"
+            values = (companyId, prompt)
+            cursor.execute(promptQuery, values)
+            mydb.commit()
+        
+        #else this is a new company
         else:
-            # Generate initial questions using the generate_question method
-            generated_questions = generate_question(prompt)
-            formatted_questions.clear()
-            formatted_answers.clear()
-            format_generated_questions(generated_questions, formatted_questions, formatted_answers)
+            name = request.form["name"]
+            branch = request.form["branch"]
+            email = request.form["email"]
+            phone = request.form["phone"]
 
-            # Store the formatted questions and answers in the session
-            session["formatted_questions"] = formatted_questions
-            session["formatted_answers"] = formatted_answers
-            session["prompt"] = prompt
+            # # Generate initial questions using the generate_question method
+            # generated_questions = generate_question(prompt)
+            # formatted_questions.clear()
+            # formatted_answers.clear()
+            # format_generated_questions(generated_questions, formatted_questions, formatted_answers)
+
+            # # Store the formatted questions and answers in the session
+            # session["formatted_questions"] = formatted_questions
+            # session["formatted_answers"] = formatted_answers
+            # session["prompt"] = prompt
 
             # Insert company data into the database
             sql = "INSERT INTO companies (name, branch, email, phone, userId) VALUES (%s, %s, %s, %s, %s)"
@@ -75,18 +89,30 @@ def company():
             cursor.execute(promptQuery, values)
             mydb.commit()
 
+        # Generate initial questions using the generate_question method
+        generated_questions = generate_question(prompt)
+        formatted_questions.clear()
+        formatted_answers.clear()
+        format_generated_questions(generated_questions, formatted_questions, formatted_answers)
+
+        # Store the formatted questions and answers in the session
+        session["formatted_questions"] = formatted_questions
+        session["formatted_answers"] = formatted_answers
+        session["prompt"] = prompt
+
         return redirect(url_for("company.survey_questions"))
+    
+    #else it was a GET request
     else:
-        return render_template("Company Interface.html")
+        return render_template("Company Interface.html", existing_company=existing_company)
 
 @company_bp.route("/survey_questions", methods=["GET", "POST"])
 def survey_questions():
     global formatted_questions, formatted_answers
 
-    # Generate the survey questions based on the prompt and display it on the page
+    # Generate the survey questions based on the prompt and display them on the page
     if request.method == "POST" and "generate_questions" in request.form:
-       
-       # Get the prompt of the company that is in session
+        # Get the prompt of the company that is in session
         companyId = session['user_id']
         sql = "SELECT prompt FROM company_prompts WHERE companyId = %s"
         cursor.execute(sql, (companyId,))
@@ -95,9 +121,8 @@ def survey_questions():
 
         if prompt is None:
             return "Error: No prompt found in the company_prompts table."
-        
+
         # Generate additional questions using the generate_question method
-        additional_questions = []
         additional_questions = generate_question(prompt)
         formatted_additional_questions = []
         formatted_additional_answers = []
@@ -122,29 +147,167 @@ def survey_questions():
         print("Final Answers", formatted_answers)
 
         companyId = session['user_id']
-        # Get the number of questions
-        num_questions = len(formatted_questions)
 
-        # Create a list with 10 elements, where the first element is the companyId
-        values = [companyId]
-        # Append the questions to the values list
-        values.extend(formatted_questions)
+        # Insert the questions into the Questions table
+        insert_questions(companyId, formatted_questions)
 
-        # Pad the values list with None for remaining columns
-        values += [None] * (10 - num_questions)
-        # Build the SQL query
-        sql = "INSERT INTO Questions (companyId, question1, question2, question3, question4, question5, question6, question7, question8, question9, question10) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
+        # Now, insert the options for each question into the QuestionOptions table
+        quesIds = retrieve_question_ids(companyId)
+        insert_question_options(quesIds, formatted_answers)
 
-        # Execute the SQL query
-        cursor.execute(sql, values)
-        mydb.commit()
+        return redirect(url_for("company.finalize_questions"))
 
-        return redirect( url_for("company.finalize_questions",question_data=zip(formatted_questions, formatted_answers),))
-    
     # Retrieve the formatted questions and answers from the session
     formatted_questions = session.get("formatted_questions", [])
     formatted_answers = session.get("formatted_answers", [])
-    return render_template("SurveyQuestions.html", question_data= zip(formatted_questions, formatted_answers))
+    return render_template("SurveyQuestions.html", question_data=zip(formatted_questions, formatted_answers))
+
+
+@company_bp.route("/finalize_questions", methods=["GET", "POST"])
+def finalize_questions():
+    current_route = "/finalize_questions"
+
+    if request.method == "POST":
+        companyId = session['user_id']
+        print("Company Id: " , companyId)
+        # I want to somehow send the prompt encoded as well. Use same strategy here to search the prompt based on company id and global prompt and send the
+        # promptId as a parameter, then on the user end, get that id and put it in the Survey table 
+        # Fetch the PromptId based on companyId and prompt
+        prompt_sql = "SELECT promptId FROM company_prompts WHERE companyId = %s AND prompt = %s"
+        prompt_values = (companyId, global_prompt)
+        cursor.execute(prompt_sql, prompt_values)
+        prompt_result = cursor.fetchone()
+
+        if prompt_result:
+            # If a matching prompt is found, use its PromptId
+            promptId = prompt_result[0]
+
+        send_survey_invitations(emails, companyId, promptId)
+        return "Survey has been sent to your email list"
+   
+    # Render the generated questions page
+    return render_template(
+        "GeneratedQuestions.html",
+        question_data=zip(formatted_questions, formatted_answers),
+        current_route=current_route,
+    )
+
+@company_bp.route("/survey", methods=["GET", "POST"])
+def survey():
+    answers = request.form
+    global companyId, email, token
+    
+    if request.method == "POST":
+        firstname = request.form["firstname"]
+        lastname = request.form["lastname"]
+        email = request.form["email"]
+        agerange = request.form["agerange"]
+        gender = request.form["gender"]
+        race = request.form["race"]
+        employmentstatus = request.form["employmentstatus"]
+
+        company_id = session.get('companyId')
+        prompt_id = session.get('promptId')
+
+        print(request.args)
+        print("Company Id in Survey form", company_id)
+        print("Prompt Id in Survey form", prompt_id)
+
+        #companyId = session['user_id']
+        # quesIds = retrieve_question_ids(companyId)
+
+        # Insert user data into the User table
+        user_id = insert_user_data(firstname, lastname, email, agerange, gender, race, employmentstatus)
+
+        # Insert survey responses into the Survey table
+        insert_survey_responses(user_id, answers, company_id, prompt_id)
+
+        # Return success message
+        return "Your responses have been recorded"
+
+    # Render the GeneratedQuestions.html page
+    else:
+        # Retrieve the token and email from the query parameters
+        token = request.args.get("token")
+        email = request.args.get("email")
+        
+        companyId = request.args.get("companyId")
+        prompt_id = request.args.get("promptId")
+
+        # Store in the session for use in the POST request
+        session['companyId'] = companyId
+        session['promptId'] = prompt_id
+        
+        # print("Email", email)
+        # print("Company ID in Survey form", companyId)
+        # print("Prompt ID in Survey form", prompt_id) 
+        current_route = "/survey"
+
+        # Retrieve the formatted questions and answers from the session
+        formatted_questions = session.get("formatted_questions", [])
+        formatted_answers = session.get("formatted_answers", [])
+        return render_template(
+            "GeneratedQuestions.html",
+            token=token,
+            email=email,
+            question_data=zip(formatted_questions, formatted_answers),
+            current_route=current_route,
+        )
+def insert_questions(companyId, formatted_questions):
+    for question in formatted_questions:
+        # Fetch the PromptId based on companyId and prompt
+        prompt_sql = "SELECT promptId FROM company_prompts WHERE companyId = %s AND prompt = %s"
+        prompt_values = (companyId, global_prompt)
+        cursor.execute(prompt_sql, prompt_values)
+        prompt_result = cursor.fetchone()
+
+        if prompt_result:
+            # If a matching prompt is found, use its PromptId
+            promptId = prompt_result[0]
+
+            # Build the SQL query for inserting questions
+            sql = "INSERT INTO Questions (CompanyId, PromptId, QuestionText) VALUES (%s, %s, %s)"
+            values = (companyId, promptId, question)
+            cursor.execute(sql, values)
+            mydb.commit()
+        else:
+            print(f"Error: No matching prompt found for company {companyId} and question {question}")
+
+
+def insert_question_options(quesId, formatted_answers):
+    # Insert options for each question into the QuestionOptions table
+    companyId = session['user_id']
+    # Fetch the PromptId based on companyId and prompt
+    prompt_sql = "SELECT promptId FROM company_prompts WHERE companyId = %s AND prompt = %s"
+    prompt_values = (companyId, global_prompt)
+    cursor.execute(prompt_sql, prompt_values)
+    prompt_result = cursor.fetchone()
+
+    if prompt_result:
+        # If a matching prompt is found, use its PromptId
+        promptId = prompt_result[0]
+
+    for i, options in enumerate(formatted_answers):
+        for j, option in enumerate(options):
+            option_number = chr(ord('a') + j)  # Convert 0-based index to 'a', 'b', 'c', 'd'
+            option_text = option.strip()
+            print(option_number)
+            print(option_text)
+            # Build the SQL query for inserting options
+            sql = "INSERT INTO QuestionOptions (CompanyId, PromptId, quesId, optionText) VALUES (%s, %s, %s, %s)"
+            # values = (companyId, companyId, quesId[i], option_number + ') ' + option_text)
+            values = (companyId, promptId, quesId[i], option_text)
+            cursor.execute(sql, values)
+    
+    mydb.commit()
+
+def retrieve_question_ids(companyId):
+    # Retrieve the question IDs for the inserted questions
+    sql = "SELECT quesId FROM Questions WHERE CompanyId = %s"
+    cursor.execute(sql, (companyId,))
+    result = cursor.fetchall()
+    quesIds = [row[0] for row in result]
+    return quesIds
 
 @company_bp.route("/delete_question/<int:question_index>", methods=["POST"])
 def delete_question(question_index):
@@ -161,97 +324,30 @@ def delete_question(question_index):
 
     return redirect(url_for("company.survey_questions"))
 
-@company_bp.route("/finalize_questions", methods=["GET", "POST"])
-def finalize_questions():
-    current_route = "/finalize_questions"
+def insert_user_data(firstname, lastname, email, agerange, gender, race, employmentstatus):
+    # Insert user data into the User table
+    sql = "INSERT INTO User (FirstName, LastName, Email, AgeRange, Gender, Race, EmploymentStatus) VALUES (%s, %s, %s, %s, %s, %s, %s)"
+    values = (firstname, lastname, email, agerange, gender, race, employmentstatus)
+    cursor.execute(sql, values)
+    mydb.commit()
+    return cursor.lastrowid
 
-    if request.method == "POST":
-        companyId = session['user_id']
-        print("Company Id: " , companyId)
-        send_survey_invitations(emails, companyId)
-        return "Survey has been sent to your email list"
-   
-    # Render the generated questions page
-    return render_template(
-        "GeneratedQuestions.html",
-        question_data=zip(formatted_questions, formatted_answers),
-        current_route=current_route,
-    )
+def insert_survey_responses(userId, answers, company_id, prompt_id):
+    # Insert survey responses into the Survey table
+    sql = "INSERT INTO Survey (UserId, CompanyId, PromptId, ResponseText) VALUES (%s, %s, %s, %s)"
 
+    questions_started = False  # Flag to track when the questions start
 
-@company_bp.route("/survey", methods=["GET", "POST"])
-def survey():
-    answers = request.form
-    global companyId, email, token
-    if request.method == "POST":
-        firstname = request.form["firstname"]
-        lastname = request.form["lastname"]
-        email = request.form["email"]
-        agerange = request.form["agerange"]
-        gender = request.form["gender"]
-        race = request.form["race"]
-        employmentstatus = request.form["employmentstatus"]
+    # answers contains all the user responses but we want to only add the responses of questions after the demographic info that ends at emp status
+    for key, response in answers.items():
+        if key == "employmentstatus":
+            questions_started = True  # Set the flag to True when employmentstatus is encountered
+        elif questions_started:
+            values = (userId, company_id, prompt_id, response)
+            cursor.execute(sql, values)
 
-        # CompanyId, QuesId and promptId for any given survey are the same
-        quesId = companyId 
-        promptId = companyId
+    mydb.commit()
 
-        # Insert data into the database
-        sql = "INSERT INTO User (firstname, lastname, email, agerange, gender, race, employmentstatus) VALUES (%s, %s, %s, %s, %s, %s, %s)"
-        values = (firstname, lastname, email, agerange, gender, race, employmentstatus)
-        cursor.execute(sql, values)
-        mydb.commit()
-
-        # getting the user id of the last inserted row
-        userId = cursor.lastrowid
-
-        # Generate the SQL query
-        survey_sql = "INSERT INTO Survey (CompanyId, UserId, QuesId, PromptId, response1, response2, response3, response4, response5, response6, response7, response8, response9, response10)VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)"
-
-        # Prepare the values for the SQL query
-        survey_values = [
-            companyId,
-            userId,  # Use the corresponding user ID from the User table
-            quesId,  # Use the corresponding question ID
-            promptId,  # Use the corresponding prompt ID
-        ]
-        form_data = request.form
-        # Retrieve and append the responses to the values list
-        user_data_keys = [ "firstname", "lastname",  "email", "agerange", "gender","race", "employmentstatus", ]
-        for key, value in form_data.items():
-            if key not in user_data_keys:
-                survey_values.append(value)
-
-        survey_values += [None] * (14 - len(survey_values))
-        print(len(survey_values))
-
-        cursor.execute(survey_sql, survey_values)
-        mydb.commit()
-
-        # Return success message-
-        return "Your responses have been recorded"
-
-    # Render the GeneratedQuestions.html page
-    else:
-        # Retrieve the token and email from the query parameters
-        token = request.args.get("token")
-        email = request.args.get("email")
-        companyId = request.args.get("companyId")
-        current_route = "/survey"
-
-        print("COMPANY ID: " , companyId)
-        print("EMAIL", email)
-        print("Token", token)
-        # Retrieve the formatted questions and answers from the session
-        formatted_questions = session.get("formatted_questions", [])
-        formatted_answers = session.get("formatted_answers", [])
-        return render_template(
-            "GeneratedQuestions.html",
-            token=token,
-            email=email,
-            question_data=zip(formatted_questions, formatted_answers),
-            current_route=current_route,
-        )
 
 def generate_question(prompt):
     try:
@@ -262,7 +358,7 @@ def generate_question(prompt):
             max_tokens=1024,
             n=2,
             stop=None,
-            temperature=0.85,
+            temperature=0.7,
         )
         # Define an empty list to store the generated questions
         questions = []

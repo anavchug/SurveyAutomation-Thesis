@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Registration</title>
+  <!-- Custom CSS File -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/register_style.css') }}">
+</head>
+<body>
+  <div class="container">
+    <div class="registration form">
+      <header>Signup</header>
+      <form action="/register" method="POST">
+        <input type="text" name="username" placeholder="Create a username" />
+        <input type="password" name="password" placeholder="Create a password" />
+        <input type="hidden" name="form_type" value="registration" />
+
+        <div class="signup">
+          <button type="submit" class="create-survey-button">Signup</button>
+        </div>
+      </form>
+      <br>
+      <div class="login-link">
+        <span>Already have an account?</span>
+        <a href="/">Login</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -2,26 +2,32 @@
 <html>
   <head>
     <title>Analysis Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/analysis_style.css') }}">
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    <link rel="stylesheet" href="../analysis_style.css">
   </head>
   <body>
     <h2>Analysis Dashboard</h2>
     <form action="{{ url_for('auth.logout') }}" method="post">
       <input type="hidden" name="_method" value="POST">
-      <button type="submit" class = "logout-button">Logout</button>
-  </form>
+      <button type="submit" class="logout-button">Logout</button>
+    </form>
     {% for question_text in question_texts %}
     <div class="chart-container">
-      <div id="chart{{ loop.index0 }}"></div>
+      <div id="chart{{ loop.index0 }}" class="response-chart"></div>
+      <div id="demographics{{ loop.index0 }}" class="demographics-chart"></div>
       <button type="button" class="view-demographic-button" onclick="viewDemographics({{ loop.index }}, '{{ question_text }}')">
         View Demographics
       </button>
     </div>
 
     <script>
-      var graphData{{ loop.index0 }} = {{ graphJSONs[loop.index0] | safe }};
-      Plotly.newPlot("chart{{ loop.index0 }}", graphData{{ loop.index0 }});
+      // Load the response chart
+      var responseChart{{ loop.index0 }} = {{ graphJSONs[loop.index0] | safe }};
+      Plotly.newPlot("chart{{ loop.index0 }}", responseChart{{ loop.index0 }});
+
+      // Load the demographics chart
+      var demographicsChart{{ loop.index0 }} = {{ demographicsJSONs[loop.index0] | safe }};
+      Plotly.newPlot("demographics{{ loop.index0 }}", demographicsChart{{ loop.index0 }});
     </script>
     {% endfor %}
 
