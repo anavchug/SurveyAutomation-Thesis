@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html>
   <head>
     <title>Analysis Dashboard</title>
@@ -38,4 +38,26 @@
       }
     </script>
   </body>
+</html> -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Analysis</title>
+</head>
+<body>
+    <h1>Data Analysis</h1>
+    <div>
+        {% for question in questions %}
+            <h2>{{ question['question'] }}</h2>
+            <ul>
+                {% for option in question['options'] %}
+                    <li>{{ option }}</li>
+                {% endfor %}
+            </ul>
+        {% endfor %}
+    </div>
+</body>
 </html>

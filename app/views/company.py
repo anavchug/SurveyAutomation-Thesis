@@ -109,21 +109,22 @@ def company():
 @company_bp.route("/survey_questions", methods=["GET", "POST"])
 def survey_questions():
     global formatted_questions, formatted_answers
+    global global_prompt
 
     # Generate the survey questions based on the prompt and display them on the page
     if request.method == "POST" and "generate_questions" in request.form:
         # Get the prompt of the company that is in session
-        companyId = session['user_id']
-        sql = "SELECT prompt FROM company_prompts WHERE companyId = %s"
-        cursor.execute(sql, (companyId,))
-        result = cursor.fetchone()
-        prompt = result[0] if result else None
+        # companyId = session['user_id']
+        # sql = "SELECT prompt FROM company_prompts WHERE companyId = %s"
+        # cursor.execute(sql, (companyId,))
+        # result = cursor.fetchone()
+        # prompt = result[0] if result else None
 
-        if prompt is None:
-            return "Error: No prompt found in the company_prompts table."
+        # if prompt is None:
+        #     return "Error: No prompt found in the company_prompts table."
 
         # Generate additional questions using the generate_question method
-        additional_questions = generate_question(prompt)
+        additional_questions = generate_question(global_prompt)
         formatted_additional_questions = []
         formatted_additional_answers = []
         format_generated_questions(additional_questions, formatted_additional_questions, formatted_additional_answers)
@@ -149,7 +150,7 @@ def survey_questions():
         companyId = session['user_id']
 
         # Insert the questions into the Questions table
-        insert_questions(companyId, formatted_questions)
+        insert_questions(companyId, global_prompt, formatted_questions)
 
         # Now, insert the options for each question into the QuestionOptions table
         quesIds = retrieve_question_ids(companyId)
@@ -253,7 +254,7 @@ def survey():
             question_data=zip(formatted_questions, formatted_answers),
             current_route=current_route,
         )
-def insert_questions(companyId, formatted_questions):
+def insert_questions(companyId, global_prompt, formatted_questions): 
     for question in formatted_questions:
         # Fetch the PromptId based on companyId and prompt
         prompt_sql = "SELECT promptId FROM company_prompts WHERE companyId = %s AND prompt = %s"
@@ -303,8 +304,16 @@ def insert_question_options(quesId, formatted_answers):
 
 def retrieve_question_ids(companyId):
     # Retrieve the question IDs for the inserted questions
-    sql = "SELECT quesId FROM Questions WHERE CompanyId = %s"
-    cursor.execute(sql, (companyId,))
+
+    # sql = "SELECT quesId FROM Questions WHERE CompanyId = %s"
+    sql = f"""
+    SELECT Questions.quesId
+    FROM Questions
+    INNER JOIN company_prompts ON Questions.PromptId = company_prompts.promptId
+    INNER JOIN companies ON Questions.CompanyId = companies.companyId
+    WHERE companies.CompanyId = %s AND company_prompts.prompt = %s
+"""
+    cursor.execute(sql, (companyId, global_prompt) )
     result = cursor.fetchall()
     quesIds = [row[0] for row in result]
     return quesIds

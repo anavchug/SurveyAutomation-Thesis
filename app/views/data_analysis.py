@@ -50,53 +50,73 @@ def home():
     # Retrieve questions from the Questions table
     cursor = mydb.cursor()
     # Fetching questions that belong to the company in session
+    # query = f"""
+    #     SELECT QuesId, CompanyId, QuestionText
+    #     FROM Questions
+    #     WHERE CompanyId = {company_id}
+    # """
+
+    # query to select questions and its options for the company in session. Need to filter the data further based on prompts
     query = f"""
-        SELECT QuesId, CompanyId, QuestionText
-        FROM Questions
-        WHERE CompanyId = {company_id}
+    SELECT Questions.QuestionText, GROUP_CONCAT(questionoptions.optionText) AS options
+    FROM Questions
+    INNER JOIN questionoptions ON Questions.quesId = questionoptions.quesId
+    WHERE Questions.CompanyId = {company_id}
+    GROUP BY Questions.QuestionText;
     """
     cursor.execute(query)
     questions_data = cursor.fetchall()
     print("Question Data", questions_data)
     cursor.close()
 
+     # Structure the data into a list of dictionaries
+    result = []
+    for row in questions_data:
+        question = row[0]
+        options = row[1].split(',')  # Split options string into a list
+        result.append({'question': question, 'options': options})
+
+    return render_template('AnalysisDashboard.html', questions=result)
+
     # Create a dictionary to map question IDs to question texts
-    question_mapping = {
-        row[0]: row[2] for row in questions_data
-    }
-    print("Question Mapping", question_mapping)
+    # question_mapping = {
+    #     row[0]: row[2] for row in questions_data
+    # }
+    # print("Question Mapping", question_mapping)
 
-    # Check if there are responses and questions
-    if data.empty or not question_mapping:
-        # There are no responses or questions for this company
-        return render_template("nosurveys.html")
+    return questions_data
 
-    # Create charts for responses
-    charts = []
+    # # Check if there are responses and questions
+    # if data.empty or not question_mapping:
+    #     # There are no responses or questions for this company
+    #     return render_template("nosurveys.html")
 
-    for question_id, question_text in question_mapping.items():
-        # Filter responses for the current question
-        print(f"Question ID: {question_id}, Question Text: {question_text}")
-        responses_column = f"responseText_{question_id}"
-        responses = data[data['UserId'] == company_id]['responseText'].dropna()
-        print(responses)
+    # # Create charts for responses
+    # charts = []
 
-        if not responses.empty:
-            # Create a bar chart for responses
-            chart = px.bar(
-                responses.value_counts().reset_index(),
-                x='responseText',  # Change 'index' to 'responseText'
-                y='count',  # Use 'count' as the y-axis
-                labels={'responseText': 'Response', 'count': 'Count'},
-                title=f"Question: {question_text}",
-            )
-            charts.append(chart)
+    # for question_id, question_text in question_mapping.items():
+    #     # Filter responses for the current question
+    #     print(f"Question ID: {question_id}, Question Text: {question_text}")
+    #     responses_column = f"responseText_{question_id}"
+    #     responses = data[data['UserId'] == company_id]['responseText'].dropna()
+    #     print(responses)
 
-    # Convert the Plotly figures to JSON
-    graphJSONs = [chart.to_json() for chart in charts]
+    #     if not responses.empty:
+    #         # Create a bar chart for responses
+    #         chart = px.bar(
+    #             responses.value_counts().reset_index(),
+    #             x='responseText',  # Change 'index' to 'responseText'
+    #             y='count',  # Use 'count' as the y-axis
+    #             labels={'responseText': 'Response', 'count': 'Count'},
+    #             title=f"Question: {question_text}",
+    #         )
+    #         charts.append(chart)
 
-    return render_template(
-        "AnalysisDashboard.html",
-        graphJSONs=graphJSONs,
-        num_charts=len(charts),
-    )
+    # # Convert the Plotly figures to JSON
+    # graphJSONs = [chart.to_json() for chart in charts]
+
+    # return render_template(
+    #     "AnalysisDashboard.html",
+    #     graphJSONs=graphJSONs,
+    #     num_charts=len(charts),
+    # )
