@@ -50,14 +50,14 @@
 <body>
     <h1>Data Analysis</h1>
     <div>
-        {% for question in questions %}
-            <h2>{{ question['question'] }}</h2>
-            <ul>
-                {% for option in question['options'] %}
-                    <li>{{ option }}</li>
-                {% endfor %}
-            </ul>
-        {% endfor %}
+        <h2>Surveys</h2>
+        <ul>
+            {% for prompt_id in prompt_ids %}
+                <li><a href="/analysis/{{ prompt_id[0] }}">Survey {{ loop.index0 + 1}}</a></li>
+            {% endfor %}
+        </ul>
     </div>
 </body>
 </html>
+
+

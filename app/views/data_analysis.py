@@ -5,86 +5,65 @@ from flask import session
 from database import get_database_connection
 
 data_analysis_bp = Blueprint('data_analysis', __name__)
+mydb = get_database_connection()
 
 @data_analysis_bp.route("/analysis", methods=['GET'])
 def home():
     # Fetch data from the MySQL database
-    mydb = get_database_connection()
     cursor = mydb.cursor()
-    # cursor.execute(
-    #     "SELECT * FROM Survey INNER JOIN User ON Survey.UserId = User.userId")
-    
-    query = f"""Select Questions.quesId, Questions.CompanyId, Questions.PromptId, 
-    Questions.QuestionText, questionoptions.optionText
-    FROM Questions
-    INNER JOIN questionoptions
-    ON Questions.quesId = questionoptions.quesId
-    """
-    cursor.execute(query)
-    data = cursor.fetchall()
-    cursor.close()
-
-    # # Convert data to DataFrame
-    # column_names = ["SurveyID", "UserId", "responseText", "userId", "FirstName", "LastName", "Email", "AgeRange", "Gender", "Race", "EmploymentStatus"]
-
-    # data = pd.DataFrame(data, columns=column_names)
-    # print("Data", data)
-
-    
-    for row in data:
-        question = row[3]
-        print(row[3] + " " + row[4])
-    
-    # question_mapping = {
-    #     row[3]: row[4] for row in data
-    # }
-    # print("Question Mapping", question_mapping)
-
-
-    #return data
-    #return question_mapping
 
     # Get the company ID from the session
     company_id = session['user_id']
 
-    # Retrieve questions from the Questions table
-    cursor = mydb.cursor()
-    # Fetching questions that belong to the company in session
-    # query = f"""
-    #     SELECT QuesId, CompanyId, QuestionText
-    #     FROM Questions
-    #     WHERE CompanyId = {company_id}
-    # """
+    getNumberOfPrompts = f"""
+    SELECT COUNT(PromptId) as NoOfPrompts
+    FROM company_prompts
+    WHERE companyId = {company_id};
+    """
+    cursor.execute(getNumberOfPrompts)
+    numPrompts = cursor.fetchone()[0]
 
-    # query to select questions and its options for the company in session. Need to filter the data further based on prompts
+    getPromptIds = f"""
+    SELECT promptId FROM company_prompts
+    WHERE companyId = {company_id};
+    """
+    cursor.execute(getPromptIds)
+    prompt_ids = cursor.fetchall()
+
+    cursor.close()
+
+    return render_template('AnalysisDashboard.html', prompt_ids=prompt_ids)
+
+@data_analysis_bp.route("/analysis/<int:prompt_id>", methods=['GET'])
+def prompt_analysis(prompt_id):
+    # Fetch data from the MySQL database
+    cursor = mydb.cursor()
+
+    # Get the company ID from the session
+    company_id = session['user_id']
+
+    # Fetch data for the specified prompt ID
     query = f"""
-    SELECT Questions.QuestionText, GROUP_CONCAT(questionoptions.optionText) AS options
+    SELECT Questions.QuestionText, GROUP_CONCAT(questionoptions.optionText SEPARATOR '|') AS options
     FROM Questions
     INNER JOIN questionoptions ON Questions.quesId = questionoptions.quesId
-    WHERE Questions.CompanyId = {company_id}
+    WHERE Questions.CompanyId = {company_id} AND Questions.PromptId = {prompt_id}
     GROUP BY Questions.QuestionText;
     """
     cursor.execute(query)
     questions_data = cursor.fetchall()
-    print("Question Data", questions_data)
-    cursor.close()
 
-     # Structure the data into a list of dictionaries
+    # Structure the data into a list of dictionaries
     result = []
     for row in questions_data:
         question = row[0]
-        options = row[1].split(',')  # Split options string into a list
+        options = row[1].split('|')  # Split options string into a list
         result.append({'question': question, 'options': options})
 
-    return render_template('AnalysisDashboard.html', questions=result)
+    cursor.close()
 
-    # Create a dictionary to map question IDs to question texts
-    # question_mapping = {
-    #     row[0]: row[2] for row in questions_data
-    # }
-    # print("Question Mapping", question_mapping)
+    return render_template('PromptAnalysis.html', prompt_id=prompt_id, questions=result)
 
-    return questions_data
 
     # # Check if there are responses and questions
     # if data.empty or not question_mapping:
