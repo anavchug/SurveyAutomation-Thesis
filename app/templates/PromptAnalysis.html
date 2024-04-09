@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!-- <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -16,5 +16,52 @@
             </ul>
         {% endfor %}
     </div>
+
+    <div>
+        {% for plot in plots %}
+            <div>
+                {{ plot.to_html(full_html=False) | safe }}
+            </div>
+        {% endfor %}
+    </div>
+</body>
+</html> -->
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prompt Analysis</title>
+    <!-- Include Plotly.js -->
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <!-- <div>
+        {% for question in questions %}
+            <h2>{{ question['question'] }}</h2>
+            <ul>
+                {% for option in question['options'] %}
+                    <li>{{ option }}</li>
+                {% endfor %}
+            </ul>
+        {% endfor %}
+    </div> -->
+<div>
+    {% for question, html_plot in zipped_data %}
+    <div id="plot_{{ loop.index }}"></div>
+    <script>
+        // Embed Plotly plot
+        var plot_{{ loop.index }}_data = '{{ html_plot | safe }}'
+        var plot_{{ loop.index }}_element = document.getElementById('plot_{{ loop.index }}')
+        plot_{{ loop.index }}_element.innerHTML = plot_{{ loop.index }}_data
+    </script>
+{% endfor %}
+</div>
+
+
 </body>
 </html>
+
+
+

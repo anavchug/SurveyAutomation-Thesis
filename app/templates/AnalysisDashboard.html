@@ -1,62 +1,20 @@
-<!-- <!DOCTYPE html>
-<html>
-  <head>
-    <title>Analysis Dashboard</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/analysis_style.css') }}">
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-  </head>
-  <body>
-    <h2>Analysis Dashboard</h2>
-    <form action="{{ url_for('auth.logout') }}" method="post">
-      <input type="hidden" name="_method" value="POST">
-      <button type="submit" class="logout-button">Logout</button>
-    </form>
-    {% for question_text in question_texts %}
-    <div class="chart-container">
-      <div id="chart{{ loop.index0 }}" class="response-chart"></div>
-      <div id="demographics{{ loop.index0 }}" class="demographics-chart"></div>
-      <button type="button" class="view-demographic-button" onclick="viewDemographics({{ loop.index }}, '{{ question_text }}')">
-        View Demographics
-      </button>
-    </div>
-
-    <script>
-      // Load the response chart
-      var responseChart{{ loop.index0 }} = {{ graphJSONs[loop.index0] | safe }};
-      Plotly.newPlot("chart{{ loop.index0 }}", responseChart{{ loop.index0 }});
-
-      // Load the demographics chart
-      var demographicsChart{{ loop.index0 }} = {{ demographicsJSONs[loop.index0] | safe }};
-      Plotly.newPlot("demographics{{ loop.index0 }}", demographicsChart{{ loop.index0 }});
-    </script>
-    {% endfor %}
-
-    <script>
-      function viewDemographics(questionId, questionText) {
-        var encodedQuestionText = encodeURIComponent(questionText);
-        window.location.href = "/demographics/" + questionId + "?question_text=" + encodedQuestionText;
-      }
-    </script>
-  </body>
-</html> -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Data Analysis</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
     <h1>Data Analysis</h1>
     <div>
-        <h2>Surveys</h2>
-        <ul>
-            {% for prompt_id in prompt_ids %}
-                <li><a href="/analysis/{{ prompt_id[0] }}">Survey {{ loop.index0 + 1}}</a></li>
-            {% endfor %}
-        </ul>
-    </div>
+      <h2>Surveys</h2>
+      {% for prompt_id in prompt_ids %}
+          <a href="/analysis/{{ prompt_id[0] }}" class="btn btn-primary mt-3">Survey {{ loop.index0 + 1 }}</a>
+      {% endfor %}
+  </div>
+  
 </body>
 </html>
 

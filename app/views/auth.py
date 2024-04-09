@@ -2,10 +2,12 @@ from flask import Blueprint, render_template, redirect, request, url_for, sessio
 from database import get_database_connection
 
 auth_bp = Blueprint('auth', __name__)
+
 mydb = get_database_connection()
 
+# login route
 @auth_bp.route('/', methods=['GET', 'POST'])
-def index(): #login route
+def index(): 
     if request.method == 'POST':
         username = request.form['username']
         password = request.form['password']
@@ -26,6 +28,7 @@ def index(): #login route
 
     return render_template("login.html")
 
+# register route
 @auth_bp.route("/register", methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
@@ -39,7 +42,7 @@ def register():
         existing_user = cursor.fetchone()
 
         if existing_user:
-            return 'Username already exists'
+            return 'Username already exists. Try another username'
         else:
             # Insert the new user into the database
             query = "INSERT INTO Accounts (username, password) VALUES (%s, %s)"
@@ -60,7 +63,6 @@ def dashboard():
         return render_template("CompanyDashboard.html", username = username)
     else:
         return redirect('/')
-    pass
 
 @auth_bp.route('/logout', methods=['POST'])
 def logout():

@@ -341,28 +341,70 @@ def insert_user_data(firstname, lastname, email, agerange, gender, race, employm
     mydb.commit()
     return cursor.lastrowid
 
+# modify this method and the Survey table to add a quesId column
+# Write a query that gets the quesId based on the response text
+# def insert_survey_responses(userId, answers, company_id, prompt_id):
+#     # Insert survey responses into the Survey table
+#     sql = "INSERT INTO Survey (UserId, CompanyId, PromptId, quesId, ResponseText) VALUES (%s, %s, %s, %s, %s)"
+
+#     questions_started = False  # Flag to track when the questions start
+
+#     # answers contains all the user responses but we want to only add the responses of questions after the demographic info that ends at emp status
+#     for key, response in answers.items():
+#         if key == "employmentstatus":
+#             questions_started = True  # Set the flag to True when employmentstatus is encountered
+#         elif questions_started:
+#             getQuesId = "SELECT quesId FROM questionoptions WHERE optionText = %s"
+#             print(response)
+#             # responseVal = (response)
+#             cursor.execute(getQuesId, (response,))
+#             optionQuesId = cursor.fetchone()
+#             values = (userId, company_id, prompt_id, optionQuesId, response)
+#             cursor.execute(sql, values)
+
+#     mydb.commit()
+
 def insert_survey_responses(userId, answers, company_id, prompt_id):
     # Insert survey responses into the Survey table
-    sql = "INSERT INTO Survey (UserId, CompanyId, PromptId, ResponseText) VALUES (%s, %s, %s, %s)"
+    sql_insert_survey = "INSERT INTO Survey (UserId, CompanyId, PromptId, quesId, ResponseText) VALUES (%s, %s, %s, %s, %s)"
+
+    # Retrieve all quesId values from the database
+    get_quesId_query = "SELECT quesId, optionText FROM questionoptions WHERE companyId = %s AND promptId = %s"
+    cursor.execute(get_quesId_query, (company_id, prompt_id))
+    quesId_mapping = {option_text: quesId for quesId, option_text in cursor.fetchall()}
+    print(quesId_mapping)
 
     questions_started = False  # Flag to track when the questions start
 
-    # answers contains all the user responses but we want to only add the responses of questions after the demographic info that ends at emp status
-    for key, response in answers.items():
-        if key == "employmentstatus":
-            questions_started = True  # Set the flag to True when employmentstatus is encountered
-        elif questions_started:
-            values = (userId, company_id, prompt_id, response)
-            cursor.execute(sql, values)
+    try:
+        for key, response in answers.items():           
+            if key == "employmentstatus":
+                questions_started = True  # Set the flag to True when employmentstatus is encountered
+            elif questions_started:
+                response = response.strip()
+                print("Response:", response)
+                optionQuesId = quesId_mapping.get(response)
+                print("Option quesId:", optionQuesId)
+                if optionQuesId is not None:
+                    values = (userId, company_id, prompt_id, optionQuesId, response)
+                    cursor.execute(sql_insert_survey, values)
 
-    mydb.commit()
+        mydb.commit()
+    except Exception as err:
+        print("Error:", err)
+       # mydb.rollback()
+    finally:
+        cursor.close()
+
 
 
 def generate_question(prompt):
     try:
         completions = openai.Completion.create(
             engine=model_engine,
-            prompt="Please generate a distinct multiple-choice question for a user survey, with 4 options labeled 'a)', 'b)', 'c)', and 'd)'. The question should be based on the given prompt, but should not mention the name of the product unless specified. Additionally, please ensure that no generated question is repeated in any completion."
+            prompt='''Please generate a distinct multiple-choice question for a user survey, with 4 options labeled 'a)', 'b)', 'c)', and 'd)'. 
+            The question should be based on the given prompt, but should not mention the name of the product unless specified. 
+            Additionally, please ensure that no generated question is repeated in any completion.'''
             + prompt,
             max_tokens=1024,
             n=2,
