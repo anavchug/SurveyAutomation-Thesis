@@ -1,9 +1,9 @@
 # Configuration variables
-SECRET_KEY = 'mykeyistheweirdestkeyevercreated#4322'
+SECRET_KEY = ''
 SESSION_TYPE = 'filesystem'
 
 # OpenAI API key
-OPENAI_API_KEY = "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"
+OPENAI_API_KEY = ""
 
 # MySQL database configuration
 DATABASE_CONFIG = {
